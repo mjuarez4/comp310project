@@ -6,7 +6,7 @@
 #include <cctype>
 #include <algorithm>
 
-enum class TokenType { Keyword, Number, Identifier, Symbol, End };
+enum class TokenType { Keyword, Number, Identifier, Symbol, String, End };
 
 struct Token {
     TokenType type;
@@ -28,6 +28,15 @@ public:
     }
 };
 
+class PrintStringNode : public Node {
+    std::string value;
+public:
+    PrintStringNode(const std::string& value) : value(value) {}
+    void evaluate() override {
+        std::cout << "Printing string: " << value << std::endl;
+    }
+};
+
 class LoopNode : public Node {
     int start, end;
     std::vector<std::unique_ptr<Node>> body;
@@ -45,44 +54,58 @@ public:
 
 
     void evaluate() override {
-    	std::cout << "Starting loop evaluation from " << start << " to " << end << std::endl;
-    	std::cout << "Nodes in loop body:" << std::endl;
-    	for (const auto& node : body) {
-        	std::cout << "Node type: " << typeid(*node).name() << std::endl; 
-    	}
+        std::cout << "Starting loop evaluation from " << start << " to " << end << std::endl;
+        std::cout << "Nodes in loop body:" << std::endl;
+        for (const auto& node : body) {
+            std::cout << "Node type: " << typeid(*node).name() << " about to evaluate." << std::endl;
+        }
 
-    	for (int i = start; i < end; ++i) {
-        	std::cout << "Loop iteration: " << i << std::endl;
-        	for (auto& node : body) {
-            		node->evaluate();
-        	}
-    	}
-    	std::cout << "Ending loop evaluation from " << start << " to " << end << std::endl;
+        for (int i = start; i < end; ++i) {
+            std::cout << "Loop iteration: " << i << std::endl;
+            for (auto& node : body) {
+                std::cout << "Evaluating node: " << typeid(*node).name() << "..." << std::endl;
+                node->evaluate();
+            }
+        }
+        std::cout << "Ending loop evaluation from " << start << " to " << end << std::endl;
     }
-
 };
 
 
 std::unique_ptr<LoopNode> parseLoop(const std::vector<Token>& tokens, size_t& current_position, int start, int end);
 
+
 std::vector<Token> getTokens(const std::string& input) {
     std::vector<Token> tokens;
     std::string currentToken;
+    bool inString = false;
+
     for (char ch : input) {
-        if (std::isspace(ch)) {
+        if (ch == '\"') { // Handle string literals
+            inString = !inString;
+            if (!inString) { // Closing quote
+                tokens.push_back({TokenType::String, currentToken});
+                currentToken.clear();
+            }
+            continue;
+        }
+
+        if (inString) {
+            currentToken += ch;
+        } else if (std::isspace(ch)) {
             if (!currentToken.empty()) {
-                if (std::isdigit(currentToken[0]) || (currentToken[0] == '-' && currentToken.size() > 1)) {
+                if (std::isdigit(currentToken[0]) || (currentToken.size() > 1 && currentToken[0] == '-' && std::isdigit(currentToken[1]))) {
                     tokens.push_back({TokenType::Number, currentToken});
                 } else {
                     tokens.push_back({TokenType::Identifier, currentToken});
                 }
                 currentToken.clear();
             }
-        } else if (std::isalpha(ch) || std::isdigit(ch) || ch == '-') {
+        } else if (std::isalnum(ch) || ch == '-') {
             currentToken += ch;
         } else {
             if (!currentToken.empty()) {
-                if (std::isdigit(currentToken[0]) || (currentToken[0] == '-' && currentToken.size() > 1)) {
+                if (std::isdigit(currentToken[0]) || (currentToken.size() > 1 && currentToken[0] == '-' && std::isdigit(currentToken[1]))) {
                     tokens.push_back({TokenType::Number, currentToken});
                 } else {
                     tokens.push_back({TokenType::Identifier, currentToken});
@@ -93,7 +116,7 @@ std::vector<Token> getTokens(const std::string& input) {
         }
     }
     if (!currentToken.empty()) {
-        if (std::isdigit(currentToken[0]) || (currentToken[0] == '-' && currentToken.size() > 1)) {
+        if (std::isdigit(currentToken[0]) || (currentToken.size() > 1 && currentToken[0] == '-' && std::isdigit(currentToken[1]))) {
             tokens.push_back({TokenType::Number, currentToken});
         } else {
             tokens.push_back({TokenType::Identifier, currentToken});
@@ -121,18 +144,25 @@ std::unique_ptr<LoopNode> parseLoop(const std::vector<Token>& tokens, size_t& cu
     while (current_position < tokens.size() && tokens[current_position].value != "loop") {
         if (tokens[current_position].type == TokenType::Number) {
             int value = safeStoi(tokens[current_position].value);
-            std::cout << "Adding print node with value: " << value << std::endl;
+            std::cout << "Adding print node with number value: " << value << std::endl;
             loopNode->addNode(std::make_unique<PrintNode>(value));
+            current_position++;
+        } else if (tokens[current_position].type == TokenType::String) {
+            std::cout << "Adding print node with string value: " << tokens[current_position].value << std::endl;
+            loopNode->addNode(std::make_unique<PrintStringNode>(tokens[current_position].value));
+            current_position++;
+        } else {
+            current_position++; // Increment to skip unrecognized or unparsed tokens
         }
-        current_position++;
     }
 
     if (current_position >= tokens.size() || tokens[current_position].value != "loop") {
         throw std::runtime_error("Missing 'loop' keyword to close loop construct.");
     }
-    current_position++; 
+    current_position++; // Move past "loop"
     return loopNode;
 }
+
 
 std::unique_ptr<Node> parseFunction(const std::vector<Token>& tokens, size_t& current_position) {
     if (tokens[current_position].type != TokenType::Symbol || tokens[current_position].value != ":") {
@@ -170,9 +200,10 @@ std::unique_ptr<Node> parseFunction(const std::vector<Token>& tokens, size_t& cu
     return functionNode;
 }
 
-
+/*
 int main() {
     std::string input = ": test 12 0 do 5 loop ;";
+    //std::string input = ": test 12 0 do \"Hello\" loop ;";
     auto tokens = getTokens(input);
     size_t position = 0;
     try {
@@ -183,6 +214,14 @@ int main() {
         std::cerr << "Error parsing input: " << e.what() << std::endl;
     }
 
+    return 0;
+}
+*/
+
+int main() {
+    LoopNode testLoop(0, 12);  // Simple loop with twelve iterations
+    testLoop.addNode(std::make_unique<PrintStringNode>("Hello World"));
+    testLoop.evaluate();
     return 0;
 }
 
