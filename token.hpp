@@ -10,7 +10,6 @@ enum class token_type_t {
 };
 
 void create_type_map(){
-
 }
 token_type_t get_token_type(string token){
 

@@ -58,14 +58,54 @@ std::stack<int> addition(std::stack<int>& intStack){
     intStack.pop();
     int val2 = intStack.top();
     intStack.pop();
-    int val3 = val1 + val2;
+    int val3 = val2 + val1;
     intStack.push(val3);
     return intStack;
 }
 
+std::stack<int> subtraction(std::stack<int>& intStack){
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+    int val3 = val2 - val1;
+    intStack.push(val3);
+    return intStack;
+}
+
+std::stack<int> multiplication(std::stack<int>& intStack){
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+    int val3 = val2 * val1;
+    intStack.push(val3);
+    return intStack;
+}
+
+std::stack<int> division (std::stack<int>& intStack){
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+    int val3 = val2 / val1;
+    intStack.push(val3);
+    return intStack;
+}
+
+std::stack<int> pop_item(std::stack<int>& intStack){
+    intStack.pop();
+    return intStack;
+}
+
+
 std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map() {
     std::map<std::string, std::function<void(std::stack<int>&)>> funcMap;
     funcMap["+"] = addition;
+    funcMap["-"] = subtraction;
+    funcMap["*"] = multiplication;
+    funcMap["/"] = division;
+    funcMap["."] = pop_item;
     return funcMap;
 }
 
@@ -126,9 +166,9 @@ std::stack<std::string> queue_to_stack(std::queue<std::string> test_queue){
 
 }
 
-int main(){
+int main(){ 
 
-    std::string input = "10 20 +";
+    std::string input = "10 20 .";
     std::queue<std::string> test_queue;
     std::istringstream iss(input);
     std::string token;
