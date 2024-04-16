@@ -6,6 +6,7 @@
 #include <cctype>
 #include <sstream>
 #include <queue>
+#include "int_stack.h"
 
 enum class token_type_t {
     NUMBER,
@@ -63,128 +64,6 @@ bool checkDigits(std::string test){
     return true;
 }
 
-std::stack<int> addition(std::stack<int>& intStack){
-    int val1 = intStack.top();
-    intStack.pop();
-    int val2 = intStack.top();
-    intStack.pop();
-    int val3 = val2 + val1;
-    intStack.push(val3);
-    return intStack;
-}
-
-std::stack<int> subtraction(std::stack<int>& intStack){
-    int val1 = intStack.top();
-    intStack.pop();
-    int val2 = intStack.top();
-    intStack.pop();
-    int val3 = val2 - val1;
-    intStack.push(val3);
-    return intStack;
-}
-
-std::stack<int> multiplication(std::stack<int>& intStack){
-    int val1 = intStack.top();
-    intStack.pop();
-    int val2 = intStack.top();
-    intStack.pop();
-    int val3 = val2 * val1;
-    intStack.push(val3);
-    return intStack;
-}
-
-std::stack<int> division (std::stack<int>& intStack){
-    int val1 = intStack.top();
-    intStack.pop();
-    int val2 = intStack.top();
-    intStack.pop();
-    int val3 = val2 / val1;
-    intStack.push(val3);
-    return intStack;
-}
-
-std::stack<int> pop_item(std::stack<int>& intStack){
-    intStack.pop();
-    return intStack;
-}
-
-std::stack<int> dup(std::stack<int>& intStack){
-    if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
-    }
-    int val1 = intStack.top();
-    intStack.pop();
-    intStack.push(val1);
-    intStack.push(val1);
-    return intStack;
-}
-
-std::stack<int> swap(std::stack<int>& intStack){
-    if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
-    }
-    int val1 = intStack.top();
-    intStack.pop();
-    int val2 = intStack.top();
-    intStack.pop();
-
-    intStack.push(val1);
-    intStack.push(val2);
-    return intStack;
-}
-
-std::stack<int> over(std::stack<int>& intStack){
-    if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
-    }
-
-    int val1 = intStack.top();
-    intStack.pop();
-    int val2 = intStack.top();
-    intStack.pop();
-
-    intStack.push(val2);
-    intStack.push(val1);
-    intStack.push(val2);
-    return intStack;
-}
-
-std::stack<int> rot(std::stack<int>& intStack){
-    if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
-    }
-    int val1 = intStack.top();
-    intStack.pop();
-    int val2 = intStack.top();
-    intStack.pop();
-    int val3 = intStack.top();
-    intStack.pop();
-
-    intStack.push(val2);
-    intStack.push(val1);
-    intStack.push(val3);
-    return intStack;
-}
-
-std::stack<int> two_swap(std::stack<int>& intStack){
-    if (intStack.size() < 4){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
-    }
-    int val1 = intStack.top();
-    intStack.pop();
-    int val2 = intStack.top();
-    intStack.pop();
-    int val3 = intStack.top();
-    intStack.pop();
-    int val4 = intStack.top();
-    intStack.pop();
-
-    intStack.push(val2);
-    intStack.push(val1);
-    intStack.push(val4);
-    intStack.push(val3);
-    return intStack;
-}
 
 std::stack<int> two_over(std::stack<int>& intStack){
     if (intStack.size() < 4){
@@ -305,6 +184,7 @@ void token_separator(std::stack<std::string> stringStack){
             token_type_t val = typeMap[current];
             if (val == token_type_t::SYMBOL){
                 std::cout << "SYMBOL!\n";
+
             } else if (val == token_type_t::BOOLEAN){
                 std::cout << "BOOLEAN!\n";
             } else if (val == token_type_t::OPERATOR){
@@ -344,7 +224,7 @@ std::stack<std::string> queue_to_stack(std::queue<std::string> test_queue){
 
 int main(){ 
 
-    std::string input = "10 20 divmod";
+    std::string input = "10 20 +";
     std::queue<std::string> test_queue;
     std::istringstream iss(input);
     std::string token;
