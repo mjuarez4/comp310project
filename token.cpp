@@ -6,6 +6,7 @@
 #include <cctype>
 #include <sstream>
 #include <queue>
+#include <optional>
 #include "int_stack.h"
 
 enum class token_type_t {
@@ -25,9 +26,6 @@ std::map<std::string, token_type_t> create_type_map(){
     map["*"] = token_type_t::OPERATOR;
     map["/"] = token_type_t::OPERATOR;
     map["."] = token_type_t::OPERATOR;
-    map["@"] = token_type_t::OPERATOR;
-    map["!"] = token_type_t::OPERATOR;
-    map["variable"] = token_type_t::OPERATOR;
     map["dup"] = token_type_t::OPERATOR;
     map["swap"] = token_type_t::OPERATOR;
     map["over"] = token_type_t::OPERATOR;
@@ -36,7 +34,7 @@ std::map<std::string, token_type_t> create_type_map(){
     map["2dup"] = token_type_t::OPERATOR;
     map["2over"] = token_type_t::OPERATOR;
     map["mod"] = token_type_t::OPERATOR;
-    map["divmod"] = token_type_t::OPERATOR;
+    map["/mod"] = token_type_t::OPERATOR;
 
     //symbol
     map[";"] = token_type_t::SYMBOL;
@@ -50,6 +48,10 @@ std::map<std::string, token_type_t> create_type_map(){
     map["or"] = token_type_t::BOOLEAN;
     map["invert"] = token_type_t::BOOLEAN;
 
+    //word
+    map["variable"] = token_type_t::WORD;
+    map["@"] = token_type_t::WORD;
+    map["!"] = token_type_t::WORD;
 
     return map;
     
@@ -64,81 +66,21 @@ bool checkDigits(std::string test){
     return true;
 }
 
+std::map<std::string, int> make_variable(std::stack<std::string>& str_stack){
+    std::map<std::string, int> variable_map;
+    std::string val1;
+    while(!str_stack.empty()){
+        val1 = str_stack.top();
+        str_stack.pop();
 
-std::stack<int> two_over(std::stack<int>& intStack){
-    if (intStack.size() < 4){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
     }
-    int val1 = intStack.top();
-    intStack.pop();
-    int val2 = intStack.top();
-    intStack.pop();
-    int val3 = intStack.top();
-    intStack.pop();
-    int val4 = intStack.top();
-    intStack.pop();
+    variable_map[val1] = 0;
+    return variable_map;
 
-    intStack.push(val4);
-    intStack.push(val3);
-    intStack.push(val2);
-    intStack.push(val1);
-    intStack.push(val4);
-    intStack.push(val3);
-    return intStack;
-}
-
-std::stack<int> two_dup(std::stack<int>& intStack){
-    if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
-    }
-    int val1 = intStack.top();
-    intStack.pop();
-    int val2 = intStack.top();
-    intStack.pop();
-
-    intStack.push(val2);
-    intStack.push(val1);
-    intStack.push(val2);
-    intStack.push(val1);
-    return intStack;
-}
-
-std::stack<int> mod(std::stack<int>& intStack){
-    if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
-    }
-    int val1 = intStack.top();
-    intStack.pop();
-    int val2 = intStack.top();
-    intStack.pop();
-
-    int mod = val2 % val1;
-    intStack.push(mod);
-    return intStack;
 }
 
 
-std::stack<int> div_mod(std::stack<int>& intStack){
-    if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
-    }
-
-    std::cout << intStack.top() << std::endl;
-    int val1 = intStack.top();
-    intStack.pop();
-    int val2 = intStack.top();
-    intStack.pop();
-
-    int rem = val2 % val1;
-    int quot = val1 / val2;
-    intStack.push(rem);
-    intStack.push(quot);
-    return intStack;
-}
-
-
-
-std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map() {
+std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int() {
     std::map<std::string, std::function<void(std::stack<int>&)>> funcMap;
     funcMap["+"] = addition;
     funcMap["-"] = subtraction;
@@ -153,9 +95,18 @@ std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map() {
     funcMap["2dup"] = two_dup;
     funcMap["2over"] = two_over;
     funcMap["mod"] = mod;
-    funcMap["divmod"] = div_mod;
+    funcMap["/mod"] = div_mod;
+    //funcMap["@"] = address;
+    //funcMap["variable"] = variable;
 
     return funcMap;
+}
+
+std::map<std::string, std::function<void(std::stack<std::string>&)>> create_func_map_str() {
+    std::map<std::string, std::function<void(std::stack<std::string>&)>> func_str_map;
+    func_str_map["variable"] = make_variable;
+
+    return func_str_map;
 }
 
 void printStack(std::stack<int>& int_stack) {
@@ -173,9 +124,10 @@ void printStack(std::stack<int>& int_stack) {
 }
 
 
-void token_separator(std::stack<std::string> stringStack){
+void token_separator(std::stack<std::string> stringStack, std::queue<std::string> stringQueue){
     std::map<std::string, token_type_t> typeMap = create_type_map();
-    std::map<std::string, std::function<void(std::stack<int>&)>> funcMap = create_func_map();
+    std::map<std::string, std::function<void(std::stack<int>&)>> funcMap = create_func_map_int();
+    std::map<std::string, std::function<void(std::stack<std::string>&)>> func_str_map = create_func_map_str();
     std::stack<int> intStack;
     while (!stringStack.empty()){
         std::string current = stringStack.top();
@@ -184,7 +136,6 @@ void token_separator(std::stack<std::string> stringStack){
             token_type_t val = typeMap[current];
             if (val == token_type_t::SYMBOL){
                 std::cout << "SYMBOL!\n";
-
             } else if (val == token_type_t::BOOLEAN){
                 std::cout << "BOOLEAN!\n";
             } else if (val == token_type_t::OPERATOR){
@@ -194,6 +145,16 @@ void token_separator(std::stack<std::string> stringStack){
                     printStack(intStack);
                     
                 }
+            } else if (typeMap[current] == token_type_t::WORD){
+                std::cout<< "hello" <<std::endl;
+                if (stringQueue.back() == "!" || stringQueue.back() == "@"){
+                    std::cout << "uhoh" << std::endl;
+                }
+                
+                if (func_str_map.find(current) != func_str_map.end()){
+                    func_str_map[current](stringStack);
+                }
+                
             } 
         } else if (checkDigits(current)){
                 int num = std::stoi(current);
@@ -224,7 +185,7 @@ std::stack<std::string> queue_to_stack(std::queue<std::string> test_queue){
 
 int main(){ 
 
-    std::string input = "10 20 +";
+    std::string input = "123 !";
     std::queue<std::string> test_queue;
     std::istringstream iss(input);
     std::string token;
@@ -233,7 +194,7 @@ int main(){
     }
 
     std::stack<std::string> final_stack = queue_to_stack(test_queue);
-    token_separator(final_stack);
+    token_separator(final_stack, test_queue);
     return 0;
 }
 

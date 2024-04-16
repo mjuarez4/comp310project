@@ -200,9 +200,10 @@ std::stack<int> div_mod(std::stack<int>& intStack){
     intStack.pop();
 
     int rem = val2 % val1;
-    int quot = val1 / val2;
+    int quot = val2 / val1;
     intStack.push(rem);
     intStack.push(quot);
     return intStack;
 }
+
 
