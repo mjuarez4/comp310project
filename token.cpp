@@ -26,6 +26,16 @@ std::map<std::string, token_type_t> create_type_map(){
     map["."] = token_type_t::OPERATOR;
     map["@"] = token_type_t::OPERATOR;
     map["!"] = token_type_t::OPERATOR;
+    map["variable"] = token_type_t::OPERATOR;
+    map["dup"] = token_type_t::OPERATOR;
+    map["swap"] = token_type_t::OPERATOR;
+    map["over"] = token_type_t::OPERATOR;
+    map["rot"] = token_type_t::OPERATOR;
+    map["2swap"] = token_type_t::OPERATOR;
+    map["2dup"] = token_type_t::OPERATOR;
+    map["2over"] = token_type_t::OPERATOR;
+    map["mod"] = token_type_t::OPERATOR;
+    map["divmod"] = token_type_t::OPERATOR;
 
     //symbol
     map[";"] = token_type_t::SYMBOL;
@@ -98,6 +108,156 @@ std::stack<int> pop_item(std::stack<int>& intStack){
     return intStack;
 }
 
+std::stack<int> dup(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+    int val1 = intStack.top();
+    intStack.pop();
+    intStack.push(val1);
+    intStack.push(val1);
+    return intStack;
+}
+
+std::stack<int> swap(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+
+    intStack.push(val1);
+    intStack.push(val2);
+    return intStack;
+}
+
+std::stack<int> over(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+
+    intStack.push(val2);
+    intStack.push(val1);
+    intStack.push(val2);
+    return intStack;
+}
+
+std::stack<int> rot(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+    int val3 = intStack.top();
+    intStack.pop();
+
+    intStack.push(val2);
+    intStack.push(val1);
+    intStack.push(val3);
+    return intStack;
+}
+
+std::stack<int> two_swap(std::stack<int>& intStack){
+    if (intStack.size() < 4){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+    int val3 = intStack.top();
+    intStack.pop();
+    int val4 = intStack.top();
+    intStack.pop();
+
+    intStack.push(val2);
+    intStack.push(val1);
+    intStack.push(val4);
+    intStack.push(val3);
+    return intStack;
+}
+
+std::stack<int> two_over(std::stack<int>& intStack){
+    if (intStack.size() < 4){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+    int val3 = intStack.top();
+    intStack.pop();
+    int val4 = intStack.top();
+    intStack.pop();
+
+    intStack.push(val4);
+    intStack.push(val3);
+    intStack.push(val2);
+    intStack.push(val1);
+    intStack.push(val4);
+    intStack.push(val3);
+    return intStack;
+}
+
+std::stack<int> two_dup(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+
+    intStack.push(val2);
+    intStack.push(val1);
+    intStack.push(val2);
+    intStack.push(val1);
+    return intStack;
+}
+
+std::stack<int> mod(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+
+    int mod = val2 % val1;
+    intStack.push(mod);
+    return intStack;
+}
+
+
+std::stack<int> div_mod(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+
+    std::cout << intStack.top() << std::endl;
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+
+    int rem = val2 % val1;
+    int quot = val1 / val2;
+    intStack.push(rem);
+    intStack.push(quot);
+    return intStack;
+}
+
+
 
 std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map() {
     std::map<std::string, std::function<void(std::stack<int>&)>> funcMap;
@@ -106,14 +266,31 @@ std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map() {
     funcMap["*"] = multiplication;
     funcMap["/"] = division;
     funcMap["."] = pop_item;
+    funcMap["dup"] = dup;
+    funcMap["swap"] = swap;
+    funcMap["over"] = over;
+    funcMap["rot"] = rot;
+    funcMap["2swap"] = two_swap;
+    funcMap["2dup"] = two_dup;
+    funcMap["2over"] = two_over;
+    funcMap["mod"] = mod;
+    funcMap["divmod"] = div_mod;
+
     return funcMap;
 }
 
-void printStack(std::stack<int>& int_stack){
+void printStack(std::stack<int>& int_stack) {
+    std::stack<int> stack1;
     while (!int_stack.empty()){
-        std::cout << int_stack.top() << std::endl;
+        stack1.push(int_stack.top());
         int_stack.pop();
     }
+
+    while (!stack1.empty()) {
+        std::cout << stack1.top() << " ";  
+        stack1.pop();
+    }
+    std::cout << std::endl;  
 }
 
 
@@ -134,7 +311,6 @@ void token_separator(std::stack<std::string> stringStack){
                 std::cout << "OPERATOR\n";
                 if (funcMap.find(current) != funcMap.end()){
                     funcMap[current](intStack);
-                    //std::cout << "OPERATOR\n";
                     printStack(intStack);
                     
                 }
@@ -168,7 +344,7 @@ std::stack<std::string> queue_to_stack(std::queue<std::string> test_queue){
 
 int main(){ 
 
-    std::string input = "10 20 .";
+    std::string input = "10 20 divmod";
     std::queue<std::string> test_queue;
     std::istringstream iss(input);
     std::string token;
@@ -180,33 +356,6 @@ int main(){
     token_separator(final_stack);
     return 0;
 }
-
-/*
-
-stack<int> push(int value, stack<int> my_stack){
-    my_stack.push(value);
-    return my_stack
-}
-
-stack<int> pop(int value, stack<int> my_stack){
-    my_stack.push(value);
-    return my_stack
-}
-
-stack<int> add(stack<int> my_stack){
-    int num1 = my_stack.pop();
-    int num2 = my_stack.pop();
-    my_stack.push(num1 + num2);
-    return my_stack
-}
-
-stack<int> subtract(stack<int> my_stack){
-    int num1 = my_stack.pop();
-    int num2 = my_stack.pop();
-    my_stack.push(num1 - num2);
-    return my_stack
-}
-*/
 
 
 
