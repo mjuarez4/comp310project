@@ -8,15 +8,7 @@
 #include <queue>
 #include <optional>
 #include "int_stack.h"
-
-enum class token_type_t {
-    NUMBER,
-    OPERATOR,
-    SYMBOL,
-    WORD,
-    BOOLEAN,
-    ILLEGAL
-};
+#include "token.hpp"
 
 std::map<std::string, token_type_t> create_type_map(){
     std::map<std::string, token_type_t> map;
@@ -66,19 +58,19 @@ bool checkDigits(std::string test){
     return true;
 }
 
-std::map<std::string, int> make_variable(std::stack<std::string>& str_stack){
-    std::map<std::string, int> variable_map;
-    std::string val1;
-    while(!str_stack.empty()){
-        val1 = str_stack.top();
-        str_stack.pop();
 
+std::map<std::string, int> variable_map;
+
+void make_variable(std::stack<std::string>& str_stack) {
+    while (!str_stack.empty()) {
+        std::string val1 = str_stack.top();
+        str_stack.pop();
+        variable_map[val1] = 0;
     }
-    variable_map[val1] = 0;
-    return variable_map;
+
+    //std::cout<<variable_map["bean"]<<std::endl;
 
 }
-
 
 std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int() {
     std::map<std::string, std::function<void(std::stack<int>&)>> funcMap;
@@ -105,7 +97,6 @@ std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int
 std::map<std::string, std::function<void(std::stack<std::string>&)>> create_func_map_str() {
     std::map<std::string, std::function<void(std::stack<std::string>&)>> func_str_map;
     func_str_map["variable"] = make_variable;
-
     return func_str_map;
 }
 
@@ -147,12 +138,27 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                 }
             } else if (typeMap[current] == token_type_t::WORD){
                 std::cout<< "hello" <<std::endl;
-                if (stringQueue.back() == "!" || stringQueue.back() == "@"){
+                if (stringQueue.back() == "!"){
                     std::cout << "uhoh" << std::endl;
                 }
-                
+
+                //checks for instance of "variable", if so create variable
                 if (func_str_map.find(current) != func_str_map.end()){
+                    std::cout << "Calling function for: " << current << std::endl;
                     func_str_map[current](stringStack);
+                    
+                }
+
+                if (stringQueue.back() == "@") {
+                    std::string var1 = stringQueue.front();
+                    stringQueue.pop();
+
+                    auto it = variable_map.find(var1);
+                    if (it != variable_map.end()){
+                        const std::string* key_address = &(it->first);
+                        std::cout<<key_address<<std::endl;
+                    }
+
                 }
                 
             } 
@@ -183,9 +189,10 @@ std::stack<std::string> queue_to_stack(std::queue<std::string> test_queue){
 
 }
 
+/*
 int main(){ 
 
-    std::string input = "123 !";
+    std::string input = "variable bean";
     std::queue<std::string> test_queue;
     std::istringstream iss(input);
     std::string token;
@@ -195,8 +202,19 @@ int main(){
 
     std::stack<std::string> final_stack = queue_to_stack(test_queue);
     token_separator(final_stack, test_queue);
+
+    std::string input2 = "bean @";
+    std::queue<std::string> test_queue2;
+    test_queue2.push("bean");
+    test_queue2.push("@");
+    //std::cout<<test_queue2.back()<<std::endl;
+    std::stack<std::string> final_stack2 = queue_to_stack(test_queue2);
+    token_separator(final_stack2, test_queue2);
     return 0;
 }
+*/
+
+
 
 
 
