@@ -45,6 +45,9 @@ std::map<std::string, token_type_t> create_type_map(){
     map["variable"] = token_type_t::WORD;
     map["@"] = token_type_t::WORD;
     map["!"] = token_type_t::WORD;
+    map["?"] = token_type_t::WORD;
+    map["+!"] = token_type_t::WORD;
+    map["constant"] = token_type_t::WORD;
 
     return map;
     
@@ -61,9 +64,11 @@ bool checkDigits(std::string test){
 
 
 std::map<std::string, int> variable_map;
+std::map<std::string, int> constant_map;
 std::stack<int> intStack;
 
 void make_variable(std::stack<std::string>& str_stack) {
+    //std::cout<<str_stack.top()<<std::endl;
     while (!str_stack.empty()) {
         std::string val1 = str_stack.top();
         str_stack.pop();
@@ -73,6 +78,24 @@ void make_variable(std::stack<std::string>& str_stack) {
     //std::cout<<variable_map["bean"]<<std::endl;
 
 }
+
+
+void make_constant(std::stack<std::string>& str_stack) {
+    while (!str_stack.empty()) {
+        //int val1 = std::stoi(str_stack.top());
+        //get name of constant
+        int const_val = intStack.top();
+        intStack.pop();
+
+        std::string str_val = str_stack.top();
+        str_stack.pop();
+        constant_map[str_val] = const_val;
+
+    }
+
+
+}
+
 
 std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int() {
     std::map<std::string, std::function<void(std::stack<int>&)>> funcMap;
@@ -99,6 +122,7 @@ std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int
 std::map<std::string, std::function<void(std::stack<std::string>&)>> create_func_map_str() {
     std::map<std::string, std::function<void(std::stack<std::string>&)>> func_str_map;
     func_str_map["variable"] = make_variable;
+    func_str_map["constant"] = make_constant;
     return func_str_map;
 }
 
@@ -138,6 +162,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
     std::map<std::string, std::function<void(std::stack<std::string>&)>> func_str_map = create_func_map_str();
     while (!stringStack.empty()){
         std::string current = stringStack.top();
+        //std::cout<<current<<std::endl;
         stringStack.pop();
         if (typeMap.find(current) != typeMap.end()){
             token_type_t val = typeMap[current];
@@ -146,7 +171,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
             } else if (val == token_type_t::BOOLEAN){
                 std::cout << "BOOLEAN!\n";
             } else if (val == token_type_t::OPERATOR){
-                std::cout << "OPERATOR\n";
+                //std::cout << "OPERATOR\n";
                 if (funcMap.find(current) != funcMap.end()){
                     funcMap[current](intStack);
                     //printStack(intStack);
@@ -165,23 +190,36 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     //std::cout << "uhoh" << std::endl;
                 }
 
+                
                 //checks for instance of "variable", if so create variable
                 if (func_str_map.find(current) != func_str_map.end()){
-                    //std::cout << "Calling function for: " << current << std::endl;
+                    std::cout << "Calling function for: " << current << std::endl;
                     func_str_map[current](stringStack);
                     
                 }
-
-            
                 
                 //this is to retrieve variable value
-               
                 if (stringQueue.back() == "@") {
                     std::string var1 = stringQueue.front();
                     stringQueue.pop();
                     int var_value = variable_map[var1];
                     intStack.push(var_value);
 
+                } else if (stringQueue.back() == "?"){
+                    std::string var1 = stringQueue.front();
+                    stringQueue.pop();
+                    int var_value = variable_map[var1];
+                    std::cout<<var_value<<std::endl;
+
+                } else if (stringQueue.back() == "+!"){
+                    intStack.pop();
+                    int increase = std::stoi(stringQueue.front());
+                    stringQueue.pop();
+                    //variable name
+                    int current_val = variable_map[stringQueue.front()];
+                    variable_map[stringQueue.front()] = current_val + increase;
+                    stringQueue.pop();
+                    stringQueue.pop();
                 }
                 
                 
@@ -203,7 +241,10 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     //std::cout<<key_address<<std::endl;
                     //intStack.push(std::stoi(key_address);
                 }   
-            }
+            } 
+        } else if (constant_map.find(current) != constant_map.end()){
+            int value = constant_map[current];
+            intStack.push(value);
         }
 
     }

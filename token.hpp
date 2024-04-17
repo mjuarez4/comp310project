@@ -21,6 +21,7 @@ enum class token_type_t {
 };
 
 extern std::map<std::string, int> variable_map;
+extern std::map<std::string, int> constant_map;
 extern std::stack<int> intStack;
 
 std::map<std::string, token_type_t> create_type_map();
@@ -31,6 +32,6 @@ std::map<std::string, std::function<void(std::stack<std::string>&)>> create_func
 void printStack(std::stack<int>& int_stack);
 void token_separator(std::stack<std::string> stringStack, std::queue<std::string> stringQueue);
 std::stack<std::string> queue_to_stack(std::queue<std::string> test_queue);
-
+void make_constant(std::stack<std::string>& str_stack);
 
 #endif
