@@ -7,6 +7,7 @@
 #include <sstream>
 #include <queue>
 #include <optional>
+#include <vector>
 #include "int_stack.h"
 #include "token.hpp"
 
@@ -60,6 +61,7 @@ bool checkDigits(std::string test){
 
 
 std::map<std::string, int> variable_map;
+std::stack<int> intStack;
 
 void make_variable(std::stack<std::string>& str_stack) {
     while (!str_stack.empty()) {
@@ -101,17 +103,32 @@ std::map<std::string, std::function<void(std::stack<std::string>&)>> create_func
 }
 
 void printStack(std::stack<int>& int_stack) {
-    std::stack<int> stack1;
-    while (!int_stack.empty()){
-        stack1.push(int_stack.top());
+    std::stack<int> temp_stack;
+    std::vector<int> items;
+
+    // Transfer elements from the original stack to a temporary stack
+    while (!int_stack.empty()) {
+        temp_stack.push(int_stack.top());
         int_stack.pop();
     }
 
-    while (!stack1.empty()) {
-        std::cout << stack1.top() << " ";  
-        stack1.pop();
+    // Transfer elements back to the original stack and collect them for output
+    while (!temp_stack.empty()) {
+        int top_element = temp_stack.top();
+        items.push_back(top_element);  // Collect elements in reverse order
+        int_stack.push(top_element);
+        temp_stack.pop();
     }
-    std::cout << std::endl;  
+
+    // Print the collected elements in the desired format
+    std::cout << "Stack: [";
+    for (size_t i = 0; i < items.size(); ++i) {
+        if (i > 0) {
+            std::cout << ", ";
+        }
+        std::cout << items[i];
+    }
+    std::cout << "] <- Top" << std::endl;
 }
 
 
@@ -119,7 +136,6 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
     std::map<std::string, token_type_t> typeMap = create_type_map();
     std::map<std::string, std::function<void(std::stack<int>&)>> funcMap = create_func_map_int();
     std::map<std::string, std::function<void(std::stack<std::string>&)>> func_str_map = create_func_map_str();
-    std::stack<int> intStack;
     while (!stringStack.empty()){
         std::string current = stringStack.top();
         stringStack.pop();
@@ -133,40 +149,66 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                 std::cout << "OPERATOR\n";
                 if (funcMap.find(current) != funcMap.end()){
                     funcMap[current](intStack);
-                    printStack(intStack);
+                    //printStack(intStack);
                     
                 }
             } else if (typeMap[current] == token_type_t::WORD){
-                std::cout<< "hello" <<std::endl;
+                //std::cout<< "hello" <<std::endl;
+                //this is to add value to variable
                 if (stringQueue.back() == "!"){
-                    std::cout << "uhoh" << std::endl;
+                    intStack.pop();
+                    int value = std::stoi(stringQueue.front());
+                    stringQueue.pop();
+                    variable_map[stringQueue.front()] = value;
+                    stringQueue.pop();
+                    stringQueue.pop();
+                    //std::cout << "uhoh" << std::endl;
                 }
 
                 //checks for instance of "variable", if so create variable
                 if (func_str_map.find(current) != func_str_map.end()){
-                    std::cout << "Calling function for: " << current << std::endl;
+                    //std::cout << "Calling function for: " << current << std::endl;
                     func_str_map[current](stringStack);
                     
                 }
 
+            
+                
+                //this is to retrieve variable value
+               
                 if (stringQueue.back() == "@") {
                     std::string var1 = stringQueue.front();
                     stringQueue.pop();
-
-                    auto it = variable_map.find(var1);
-                    if (it != variable_map.end()){
-                        const std::string* key_address = &(it->first);
-                        std::cout<<key_address<<std::endl;
-                    }
+                    int var_value = variable_map[var1];
+                    intStack.push(var_value);
 
                 }
+                
                 
             } 
         } else if (checkDigits(current)){
                 int num = std::stoi(current);
                 intStack.push(num);
+        } else if (stringStack.size() == 0){
+            if (variable_map.find(current) != variable_map.end()){
+                auto it = variable_map.find(current);
+                if (it != variable_map.end()){
+                    const std::string* key_address = &(it->first);
+                    uintptr_t numeric_address = reinterpret_cast<uintptr_t>(key_address);
+        
+                    
+                    int address_as_int = static_cast<int>(numeric_address);
+
+                    intStack.push(address_as_int);
+                    //std::cout<<key_address<<std::endl;
+                    //intStack.push(std::stoi(key_address);
+                }   
+            }
         }
+
     }
+    printStack(intStack);
+    //(intStack);
     
 }
 

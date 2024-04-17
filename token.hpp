@@ -21,6 +21,7 @@ enum class token_type_t {
 };
 
 extern std::map<std::string, int> variable_map;
+extern std::stack<int> intStack;
 
 std::map<std::string, token_type_t> create_type_map();
 bool checkDigits(std::string test);
