@@ -23,19 +23,29 @@ class PrintNode : public Node {
     int value;
 public:
     PrintNode(int value) : value(value) {}
+
+    int getValue() const { return value; } 
+
     void evaluate() override {
-        std::cout << "Printing value: " << value << std::endl;
+        std::cout << "Evaluating PrintNode with value: " << value << std::endl;
+        std::cout.flush(); 
     }
 };
+
 
 class PrintStringNode : public Node {
     std::string value;
 public:
     PrintStringNode(const std::string& value) : value(value) {}
+
+    const std::string& getValue() const { return value; } 
+
     void evaluate() override {
-        std::cout << "Printing string: " << value << std::endl;
+        std::cout << "Evaluating PrintStringNode with string: " << value << std::endl;
+        std::cout.flush();  
     }
 };
+
 
 class LoopNode : public Node {
     int start, end;
@@ -55,20 +65,21 @@ public:
 
     void evaluate() override {
         std::cout << "Starting loop evaluation from " << start << " to " << end << std::endl;
-        std::cout << "Nodes in loop body:" << std::endl;
-        for (const auto& node : body) {
-            std::cout << "Node type: " << typeid(*node).name() << " about to evaluate." << std::endl;
-        }
-
         for (int i = start; i < end; ++i) {
             std::cout << "Loop iteration: " << i << std::endl;
             for (auto& node : body) {
-                std::cout << "Evaluating node: " << typeid(*node).name() << "..." << std::endl;
-                node->evaluate();
+                std::cout << "About to evaluate node: " << typeid(*node).name() << " containing ";
+                if (typeid(*node) == typeid(PrintNode)) {
+                    std::cout << "number " << dynamic_cast<PrintNode*>(node.get())->getValue() << std::endl;
+                } else if (typeid(*node) == typeid(PrintStringNode)) {
+                    std::cout << "string " << dynamic_cast<PrintStringNode*>(node.get())->getValue() << std::endl;
+               }
+               node->evaluate();
             }
         }
         std::cout << "Ending loop evaluation from " << start << " to " << end << std::endl;
     }
+
 };
 
 
@@ -81,9 +92,9 @@ std::vector<Token> getTokens(const std::string& input) {
     bool inString = false;
 
     for (char ch : input) {
-        if (ch == '\"') { // Handle string literals
+        if (ch == '\"') {
             inString = !inString;
-            if (!inString) { // Closing quote
+            if (!inString) {
                 tokens.push_back({TokenType::String, currentToken});
                 currentToken.clear();
             }
@@ -92,49 +103,53 @@ std::vector<Token> getTokens(const std::string& input) {
 
         if (inString) {
             currentToken += ch;
-        } else if (std::isspace(ch)) {
+        } else if (std::isspace(ch) || ch == ';' || ch == ':') {
             if (!currentToken.empty()) {
-                if (std::isdigit(currentToken[0]) || (currentToken.size() > 1 && currentToken[0] == '-' && std::isdigit(currentToken[1]))) {
-                    tokens.push_back({TokenType::Number, currentToken});
-                } else {
-                    tokens.push_back({TokenType::Identifier, currentToken});
-                }
+                TokenType type = std::isdigit(currentToken[0]) ? TokenType::Number : TokenType::Identifier;
+                tokens.push_back({type, currentToken});
                 currentToken.clear();
+            }
+            if (ch == ';' || ch == ':') {
+                tokens.push_back({TokenType::Symbol, std::string(1, ch)});
             }
         } else if (std::isalnum(ch) || ch == '-') {
             currentToken += ch;
         } else {
             if (!currentToken.empty()) {
-                if (std::isdigit(currentToken[0]) || (currentToken.size() > 1 && currentToken[0] == '-' && std::isdigit(currentToken[1]))) {
-                    tokens.push_back({TokenType::Number, currentToken});
-                } else {
-                    tokens.push_back({TokenType::Identifier, currentToken});
-                }
+                TokenType type = std::isdigit(currentToken[0]) ? TokenType::Number : TokenType::Identifier;
+                tokens.push_back({type, currentToken});
                 currentToken.clear();
             }
             tokens.push_back({TokenType::Symbol, std::string(1, ch)});
         }
     }
+
     if (!currentToken.empty()) {
-        if (std::isdigit(currentToken[0]) || (currentToken.size() > 1 && currentToken[0] == '-' && std::isdigit(currentToken[1]))) {
-            tokens.push_back({TokenType::Number, currentToken});
-        } else {
-            tokens.push_back({TokenType::Identifier, currentToken});
-        }
+        TokenType type = std::isdigit(currentToken[0]) ? TokenType::Number : TokenType::Identifier;
+        tokens.push_back({type, currentToken});
     }
     tokens.push_back({TokenType::End, ""});
     return tokens;
 }
 
 
+
+
 int safeStoi(const std::string& str) {
-    if (str.empty() || !std::all_of(str.begin(), str.end(), [&str](char c) {
-        return std::isdigit(c) || (c == '-' && &c == &str.front()); 
-    })) {
-        throw std::invalid_argument("Invalid input for stoi: " + str);
+    try {
+        if (str.empty() || !std::all_of(str.begin(), str.end(), [](char c) { return std::isdigit(c) || c == '-'; })) {
+            throw std::invalid_argument("Invalid input for stoi: " + str);
+        }
+        return std::stoi(str);
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "Invalid argument for stoi with input '" << str << "': " << e.what() << std::endl;
+        throw;
+    } catch (const std::out_of_range& e) {
+        std::cerr << "Out of range error for stoi with input '" << str << "': " << e.what() << std::endl;
+        throw;
     }
-    return std::stoi(str);
 }
+
 
 
 std::unique_ptr<LoopNode> parseLoop(const std::vector<Token>& tokens, size_t& current_position, int start, int end) {
@@ -152,14 +167,14 @@ std::unique_ptr<LoopNode> parseLoop(const std::vector<Token>& tokens, size_t& cu
             loopNode->addNode(std::make_unique<PrintStringNode>(tokens[current_position].value));
             current_position++;
         } else {
-            current_position++; // Increment to skip unrecognized or unparsed tokens
+            current_position++; 
         }
     }
 
     if (current_position >= tokens.size() || tokens[current_position].value != "loop") {
         throw std::runtime_error("Missing 'loop' keyword to close loop construct.");
     }
-    current_position++; // Move past "loop"
+    current_position++; 
     return loopNode;
 }
 
@@ -200,11 +215,24 @@ std::unique_ptr<Node> parseFunction(const std::vector<Token>& tokens, size_t& cu
     return functionNode;
 }
 
-/*
+void testNodes() {
+    // Test each node type
+    PrintNode pn(5);
+    PrintStringNode psn("Hello");
+    pn.evaluate(); // Should print "Printing value: 5"
+    psn.evaluate(); // Should print "Printing string: Hello"
+}
+
 int main() {
-    std::string input = ": test 12 0 do 5 loop ;";
-    //std::string input = ": test 12 0 do \"Hello\" loop ;";
+    testNodes();
+    std::string input = ": test 15 0 do 5 \"Hello\" loop ;";
     auto tokens = getTokens(input);
+
+    // Display each token and its type
+    for (const auto& token : tokens) {
+        std::cout << "Token: \"" << token.value << "\" Type: " << static_cast<int>(token.type) << std::endl;
+    }
+
     size_t position = 0;
     try {
         auto ast = parseFunction(tokens, position);
@@ -216,12 +244,14 @@ int main() {
 
     return 0;
 }
-*/
 
+
+/*
 int main() {
     LoopNode testLoop(0, 12);  // Simple loop with twelve iterations
     testLoop.addNode(std::make_unique<PrintStringNode>("Hello World"));
     testLoop.evaluate();
     return 0;
 }
+*/
 
