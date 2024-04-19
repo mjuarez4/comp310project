@@ -34,13 +34,13 @@ std::map<std::string, token_type_t> create_type_map(){
     map[";"] = token_type_t::SYMBOL;
     map[":"] = token_type_t::SYMBOL;
 
-    //boolean
-    map["="] = token_type_t::BOOLEAN;
-    map["<"] = token_type_t::BOOLEAN;
-    map[">"] = token_type_t::BOOLEAN;
-    map["and"] = token_type_t::BOOLEAN;
-    map["or"] = token_type_t::BOOLEAN;
-    map["invert"] = token_type_t::BOOLEAN;
+    //boolean operators
+    map["="] = token_type_t::OPERATOR;
+    map["<"] = token_type_t::OPERATOR;
+    map[">"] = token_type_t::OPERATOR;
+    map["and"] = token_type_t::OPERATOR;
+    map["or"] = token_type_t::OPERATOR;
+    map["invert"] = token_type_t::OPERATOR;
 
     //word
     map["variable"] = token_type_t::WORD;
@@ -115,8 +115,12 @@ std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int
     funcMap["2over"] = two_over;
     funcMap["mod"] = mod;
     funcMap["/mod"] = div_mod;
-    //funcMap["@"] = address;
-    //funcMap["variable"] = variable;
+    funcMap["="] = equality;
+    funcMap["<"] = less;
+    funcMap[">"] = greater;
+    funcMap["and"] = and_comp;
+    funcMap["or"] = or_comp;
+    funcMap["invert"] = invert;
 
     return funcMap;
 }
@@ -141,7 +145,7 @@ void printStack(std::stack<int>& int_stack) {
     // Transfer elements back to the original stack and collect them for output
     while (!temp_stack.empty()) {
         int top_element = temp_stack.top();
-        items.push_back(top_element);  // Collect elements in reverse order
+        items.push_back(top_element);  
         int_stack.push(top_element);
         temp_stack.pop();
     }
@@ -177,7 +181,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                 if (funcMap.find(current) != funcMap.end()){
                     funcMap[current](intStack);
                     //printStack(intStack);
-                    
+                   
                 }
             } else if (typeMap[current] == token_type_t::WORD){
                 
@@ -214,6 +218,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     int var_value = variable_map[var1];
                     std::cout<<var_value<<std::endl;
 
+                    
                 //updates variable value
                 } else if (stringQueue.back() == "+!"){
                     intStack.pop();

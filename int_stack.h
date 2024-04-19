@@ -27,4 +27,10 @@ std::stack<int> two_over(std::stack<int>& intStack);
 std::stack<int> two_dup(std::stack<int>& intStack);
 std::stack<int> mod(std::stack<int>& intStack);
 std::stack<int> div_mod(std::stack<int>& intStack);
+std::stack<int> equality(std::stack<int>& intStack);
+std::stack<int> less(std::stack<int>& intStack);
+std::stack<int> greater(std::stack<int>& intStack);
+std::stack<int> and_comp(std::stack<int>& intStack);
+std::stack<int> or_comp(std::stack<int>& intStack);
+std::stack<int> invert(std::stack<int>& intStack);
 #endif
