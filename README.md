@@ -37,3 +37,5 @@ Completed:
 To do:
 -- add booleans (<, >, and, etc.)
 
+Luke 4/18
+-- Iterations are working for the loop. There exists a bug where the content of the loop is not being printed to the console.
