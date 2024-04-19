@@ -81,7 +81,13 @@ void print_forth(int_stack_t *stk){
 
 
 void separate_token(int_stack_t *stk, char *text, char* stringList[], int *intList) {
-      
+    string m = ": fizz?  3 mod 0 = dup if ." Fizz" then ;"
+    if token == ":":
+        stack<string> = rest
+
+
+
+
     const char *space = " ";
     char *token;
     char *rest = text;

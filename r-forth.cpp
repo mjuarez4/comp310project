@@ -1,8 +1,24 @@
 #include <iostream>
 #include <stack>
 #include <string>
+#include <queue>
+
+
+#include "token.hpp"
 
 using namespace std;
+
+
+std::queue<std::string> make_into_queue(std::string line){
+    std::istringstream iss(line);
+    std::string token;
+    std::queue<std::string> tokens;
+    while (iss >> token) {
+        tokens.push(token);
+    }
+    return tokens;
+
+}
 
 int main(){
     //declaration of an int stack
@@ -24,6 +40,10 @@ int main(){
         if (line == "bye") {
             break;
         }
+
+        std::queue<std::string> queue1 = make_into_queue(line);
+        std::stack<std::string> stack1 = queue_to_stack(queue1);
+        token_separator(stack1, queue1);
 
         //separate_token(myStack, line, stringList, intList);
         //print_forth(myStack);

@@ -18,7 +18,7 @@ How to run with C-11 compiler:
  ./token
 
 
-Functionality: Maddie 4/15
+Functionality: Maddie 4/17
 -- testing with main() in token.cpp (don't worry, this will be removed in the final submission, i just made it easier
 to test input instead of compiling the user interface every time)
 -- added a mapping from token to function
@@ -26,10 +26,14 @@ to test input instead of compiling the user interface every time)
 -- added a mapping from token to token type
     -- planning on controlling input by checking first if token is a : or ; -> if so, push everything onto a stack and handle
     in custom function (to be built by Nick/Luke)
--- planning on taking input as a queue, converting queue to stack to be broken down token by token
+-- take input as string stack, convert to queue (so that you can see the front/back of input at all times)
+-- added compatability for variables and constants
+-- re-added interactivity on command line
 
+Completed:
+-- basic operations (+, -, dup, swap, etc.)
+-- variable declaration and operation (!, @, +!)
 
 To do:
--- add other stack functions (subtraction, multiplication, etc.)
 -- add booleans (<, >, and, etc.)
 
