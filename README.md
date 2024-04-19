@@ -14,7 +14,7 @@ To use C++ to reconstruct our foundational construction of forth interpretation 
 Updates:
 
 How to run with C-11 compiler:
- g++ -std=c++11 -o token token.cpp
+ g++ -std=c++11 -o token int_stack.cpp token.cpp r-forth.cpp
  ./token
 
 

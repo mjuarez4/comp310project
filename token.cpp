@@ -28,6 +28,7 @@ std::map<std::string, token_type_t> create_type_map(){
     map["2over"] = token_type_t::OPERATOR;
     map["mod"] = token_type_t::OPERATOR;
     map["/mod"] = token_type_t::OPERATOR;
+    map["drop"] = token_type_t::OPERATOR;
 
     //symbol
     map[";"] = token_type_t::SYMBOL;
@@ -68,14 +69,14 @@ std::map<std::string, int> constant_map;
 std::stack<int> intStack;
 
 void make_variable(std::stack<std::string>& str_stack) {
-    //std::cout<<str_stack.top()<<std::endl;
+    
     while (!str_stack.empty()) {
         std::string val1 = str_stack.top();
         str_stack.pop();
         variable_map[val1] = 0;
     }
 
-    //std::cout<<variable_map["bean"]<<std::endl;
+    
 
 }
 
@@ -103,6 +104,7 @@ std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int
     funcMap["-"] = subtraction;
     funcMap["*"] = multiplication;
     funcMap["/"] = division;
+    funcMap["drop"] = pop_item;
     funcMap["."] = pop_item;
     funcMap["dup"] = dup;
     funcMap["swap"] = swap;
@@ -178,7 +180,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     
                 }
             } else if (typeMap[current] == token_type_t::WORD){
-                //std::cout<< "hello" <<std::endl;
+                
                 //this is to add value to variable
                 if (stringQueue.back() == "!"){
                     intStack.pop();
@@ -205,12 +207,14 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     int var_value = variable_map[var1];
                     intStack.push(var_value);
 
+                //prints out variable value
                 } else if (stringQueue.back() == "?"){
                     std::string var1 = stringQueue.front();
                     stringQueue.pop();
                     int var_value = variable_map[var1];
                     std::cout<<var_value<<std::endl;
 
+                //updates variable value
                 } else if (stringQueue.back() == "+!"){
                     intStack.pop();
                     int increase = std::stoi(stringQueue.front());
@@ -228,6 +232,8 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                 int num = std::stoi(current);
                 intStack.push(num);
         } else if (stringStack.size() == 0){
+
+            //handles calls of just variable
             if (variable_map.find(current) != variable_map.end()){
                 auto it = variable_map.find(current);
                 if (it != variable_map.end()){
@@ -241,7 +247,8 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     //std::cout<<key_address<<std::endl;
                     //intStack.push(std::stoi(key_address);
                 }   
-            } 
+            }
+          //handles calls of just constant
         } else if (constant_map.find(current) != constant_map.end()){
             int value = constant_map[current];
             intStack.push(value);
