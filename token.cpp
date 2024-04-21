@@ -175,6 +175,23 @@ std::map<std::string, std::function<void(std::stack<std::string>&)>> create_word
     return word_def_map;
 }
 
+std::queue<std::string> stack_to_queue(std::stack<std::string> stringStack){
+    std::stack<std::string> tempStack;
+    std::queue<std::string> outputQueue;
+
+    while (!stringStack.empty()) {
+        tempStack.push(stringStack.top());
+        stringStack.pop();
+    }
+
+    while (!tempStack.empty()) {
+        outputQueue.push(tempStack.top());
+        tempStack.pop();
+    }
+
+    return outputQueue;
+}
+
 void parse_word_definition(std::stack<std::string> word_def_stack){
     std::map<std::string, std::function<void(std::stack<std::string>&)>> word_func = create_word_map();
     while (!word_def_stack.empty()){
@@ -182,9 +199,16 @@ void parse_word_definition(std::stack<std::string> word_def_stack){
         word_def_stack.pop();
         if (word_func.find(current) != word_func.end()){
             word_func[current](word_def_stack);
+        } else {
+            word_def_stack.push(current);
+            std::queue<std::string> word_def_queue = stack_to_queue(word_def_stack);
+            token_separator(word_def_stack, word_def_queue);
+            break;
         }
-    }
+    } 
 }
+
+
 void printStack(std::stack<int>& int_stack) {
     std::stack<int> temp_stack;
     std::vector<int> items;
@@ -230,6 +254,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                 if (func_str_map.find(current) != func_str_map.end()){
                     func_str_map[current](stringStack);
                 }
+                break;
             } else if (val == token_type_t::OPERATOR){
                 if (funcMap.find(current) != funcMap.end()){
                     funcMap[current](intStack);
@@ -291,6 +316,10 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
         } else if (checkDigits(current)){
                 int num = std::stoi(current);
                 intStack.push(num);
+                stringQueue.pop();
+                //std::cout<<"even more confusde"<<std::endl;
+                //std::cout<<stringQueue.front()<<std::endl;
+                
         } else if (stringStack.size() == 0){
 
             //handles calls of just variable
@@ -312,17 +341,21 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
         } else if (constant_map.find(current) != constant_map.end()){
             int value = constant_map[current];
             intStack.push(value);
-        }
+        } else if (word_definition_map.find(current) != word_definition_map.end()){
+              stringQueue.pop();
+              parse_word_definition(word_definition_map[current]);
+        }   
 
     }
 
     std::string current = stringQueue.front();
     if (word_definition_map.find(current) != word_definition_map.end()){
-            stringQueue.pop();
-            parse_word_definition(word_definition_map[current]);
-    } 
+              stringQueue.pop();
+              
+              parse_word_definition(word_definition_map[current]);
+    }
+   
     printStack(intStack);
-    //(intStack);
     
 }
 
