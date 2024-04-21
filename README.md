@@ -36,6 +36,3 @@ Completed:
 -- add booleans (<, >, and, etc.)
 
 To do:
-
--- clean up 'WORD' code into functions
--- begin adding array implementation
