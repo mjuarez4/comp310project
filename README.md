@@ -33,7 +33,9 @@ to test input instead of compiling the user interface every time)
 Completed:
 -- basic operations (+, -, dup, swap, etc.)
 -- variable declaration and operation (!, @, +!)
-
-To do:
 -- add booleans (<, >, and, etc.)
 
+To do:
+
+-- clean up 'WORD' code into functions
+-- begin adding array implementation

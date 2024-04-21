@@ -76,10 +76,8 @@ void make_variable(std::stack<std::string>& str_stack) {
         variable_map[val1] = 0;
     }
 
-    
 
 }
-
 
 void make_constant(std::stack<std::string>& str_stack) {
     while (!str_stack.empty()) {
@@ -94,9 +92,7 @@ void make_constant(std::stack<std::string>& str_stack) {
 
     }
 
-
 }
-
 
 std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int() {
     std::map<std::string, std::function<void(std::stack<int>&)>> funcMap;
@@ -174,10 +170,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
             token_type_t val = typeMap[current];
             if (val == token_type_t::SYMBOL){
                 std::cout << "SYMBOL!\n";
-            } else if (val == token_type_t::BOOLEAN){
-                std::cout << "BOOLEAN!\n";
             } else if (val == token_type_t::OPERATOR){
-                //std::cout << "OPERATOR\n";
                 if (funcMap.find(current) != funcMap.end()){
                     funcMap[current](intStack);
                     //printStack(intStack);
@@ -196,13 +189,15 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     //std::cout << "uhoh" << std::endl;
                 }
 
-                
+
                 //checks for instance of "variable", if so create variable
                 if (func_str_map.find(current) != func_str_map.end()){
                     std::cout << "Calling function for: " << current << std::endl;
                     func_str_map[current](stringStack);
                     
                 }
+
+                
                 
                 //this is to retrieve variable value
                 if (stringQueue.back() == "@") {
@@ -283,31 +278,6 @@ std::stack<std::string> queue_to_stack(std::queue<std::string> test_queue){
 
 
 }
-
-/*
-int main(){ 
-
-    std::string input = "variable bean";
-    std::queue<std::string> test_queue;
-    std::istringstream iss(input);
-    std::string token;
-    while (iss >> token) {
-        test_queue.push(token);
-    }
-
-    std::stack<std::string> final_stack = queue_to_stack(test_queue);
-    token_separator(final_stack, test_queue);
-
-    std::string input2 = "bean @";
-    std::queue<std::string> test_queue2;
-    test_queue2.push("bean");
-    test_queue2.push("@");
-    //std::cout<<test_queue2.back()<<std::endl;
-    std::stack<std::string> final_stack2 = queue_to_stack(test_queue2);
-    token_separator(final_stack2, test_queue2);
-    return 0;
-}
-*/
 
 
 
