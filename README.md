@@ -14,7 +14,7 @@ To use C++ to reconstruct our foundational construction of forth interpretation 
 Updates:
 
 How to run with C-11 compiler:
- g++ -std=c++11 -o token token.cpp
+ g++ -std=c++11 -o token int_stack.cpp token.cpp r-forth.cpp
  ./token
 
 
@@ -33,9 +33,6 @@ to test input instead of compiling the user interface every time)
 Completed:
 -- basic operations (+, -, dup, swap, etc.)
 -- variable declaration and operation (!, @, +!)
-
-To do:
 -- add booleans (<, >, and, etc.)
 
-Luke 4/18
--- Iterations are working for the loop. There exists a bug where the content of the loop is not being printed to the console.
+To do:

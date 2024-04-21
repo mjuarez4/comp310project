@@ -206,4 +206,113 @@ std::stack<int> div_mod(std::stack<int>& intStack){
     return intStack;
 }
 
+std::stack<int> equality(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+
+    if (val1 == val2){
+        intStack.push(-1);
+    } else {
+        intStack.push(0);
+    }
+    return intStack;
+}
+
+std::stack<int> less(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+
+    if (val1 > val2){
+        intStack.push(-1);
+    } else {
+        intStack.push(0);
+    }
+    return intStack;
+}
+
+
+std::stack<int> greater(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+
+
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+
+    if (val1 < val2){
+        intStack.push(-1);
+    } else {
+        intStack.push(0);
+    }
+    return intStack;
+}
+
+std::stack<int> and_comp(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+
+    //std::cout<<intStack.top()<<std::endl;
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+
+    if (val1 == val2){
+        intStack.push(-1);
+    } else {
+        intStack.push(0);
+    }
+    return intStack;
+}
+
+std::stack<int> or_comp(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+
+    //std::cout<<intStack.top()<<std::endl;
+    int val1 = intStack.top();
+    intStack.pop();
+    int val2 = intStack.top();
+    intStack.pop();
+
+    if (val1 == -1 || val2 == -1){
+        intStack.push(-1);
+    } else {
+        intStack.push(0);
+    }
+    return intStack;
+}
+
+std::stack<int> invert(std::stack<int>& intStack){
+    if (intStack.size() < 1){
+        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    }
+
+    //std::cout<<intStack.top()<<std::endl;
+    int val1 = intStack.top();
+    intStack.pop();
+
+    if (val1 == -1){
+        intStack.push(0);
+    } else {
+        intStack.push(-1);
+    }
+    return intStack;
+}
+
 

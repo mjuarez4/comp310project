@@ -28,18 +28,19 @@ std::map<std::string, token_type_t> create_type_map(){
     map["2over"] = token_type_t::OPERATOR;
     map["mod"] = token_type_t::OPERATOR;
     map["/mod"] = token_type_t::OPERATOR;
+    map["drop"] = token_type_t::OPERATOR;
 
     //symbol
     map[";"] = token_type_t::SYMBOL;
     map[":"] = token_type_t::SYMBOL;
 
-    //boolean
-    map["="] = token_type_t::BOOLEAN;
-    map["<"] = token_type_t::BOOLEAN;
-    map[">"] = token_type_t::BOOLEAN;
-    map["and"] = token_type_t::BOOLEAN;
-    map["or"] = token_type_t::BOOLEAN;
-    map["invert"] = token_type_t::BOOLEAN;
+    //boolean operators
+    map["="] = token_type_t::OPERATOR;
+    map["<"] = token_type_t::OPERATOR;
+    map[">"] = token_type_t::OPERATOR;
+    map["and"] = token_type_t::OPERATOR;
+    map["or"] = token_type_t::OPERATOR;
+    map["invert"] = token_type_t::OPERATOR;
 
     //word
     map["variable"] = token_type_t::WORD;
@@ -65,20 +66,19 @@ bool checkDigits(std::string test){
 
 std::map<std::string, int> variable_map;
 std::map<std::string, int> constant_map;
+std::map<std::string, std::stack<std::string>> word_definition_map;
 std::stack<int> intStack;
 
 void make_variable(std::stack<std::string>& str_stack) {
-    //std::cout<<str_stack.top()<<std::endl;
+    
     while (!str_stack.empty()) {
         std::string val1 = str_stack.top();
         str_stack.pop();
         variable_map[val1] = 0;
     }
 
-    //std::cout<<variable_map["bean"]<<std::endl;
 
 }
-
 
 void make_constant(std::stack<std::string>& str_stack) {
     while (!str_stack.empty()) {
@@ -93,9 +93,46 @@ void make_constant(std::stack<std::string>& str_stack) {
 
     }
 
-
 }
 
+void make_word_definition(std::stack<std::string>& str_stack) {
+    std::string word_name = str_stack.top();
+    str_stack.pop();
+
+    word_definition_map[word_name] = str_stack;
+}
+
+void print_word(std::stack<std::string>& str_stack){
+    // Hello there!" ;
+    std::string final = "";
+    while(!str_stack.empty()){
+        final += str_stack.top();
+        str_stack.pop();
+
+        // there!" ;
+        std::queue<std::string> new_queue;
+        while(str_stack.top() != ";" && !str_stack.empty()){
+            new_queue.push(str_stack.top());
+            str_stack.pop();
+        }
+
+        //pop ;
+        str_stack.pop();
+
+        //there!"
+        while(new_queue.size() > 1){
+            std::cout<<new_queue.front()<<std::endl;
+            new_queue.pop();
+        }
+
+        std::string last_string = new_queue.front();
+        last_string.pop_back();
+
+        final += " " + last_string;
+    }
+
+    std::cout<<final<<std::endl;
+}
 
 std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int() {
     std::map<std::string, std::function<void(std::stack<int>&)>> funcMap;
@@ -103,6 +140,7 @@ std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int
     funcMap["-"] = subtraction;
     funcMap["*"] = multiplication;
     funcMap["/"] = division;
+    funcMap["drop"] = pop_item;
     funcMap["."] = pop_item;
     funcMap["dup"] = dup;
     funcMap["swap"] = swap;
@@ -113,8 +151,12 @@ std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int
     funcMap["2over"] = two_over;
     funcMap["mod"] = mod;
     funcMap["/mod"] = div_mod;
-    //funcMap["@"] = address;
-    //funcMap["variable"] = variable;
+    funcMap["="] = equality;
+    funcMap["<"] = less;
+    funcMap[">"] = greater;
+    funcMap["and"] = and_comp;
+    funcMap["or"] = or_comp;
+    funcMap["invert"] = invert;
 
     return funcMap;
 }
@@ -123,8 +165,49 @@ std::map<std::string, std::function<void(std::stack<std::string>&)>> create_func
     std::map<std::string, std::function<void(std::stack<std::string>&)>> func_str_map;
     func_str_map["variable"] = make_variable;
     func_str_map["constant"] = make_constant;
+    func_str_map[":"] = make_word_definition;
     return func_str_map;
 }
+
+std::map<std::string, std::function<void(std::stack<std::string>&)>> create_word_map() {
+    std::map<std::string, std::function<void(std::stack<std::string>&)>> word_def_map;
+    word_def_map[".\""] = print_word;
+    return word_def_map;
+}
+
+std::queue<std::string> stack_to_queue(std::stack<std::string> stringStack){
+    std::stack<std::string> tempStack;
+    std::queue<std::string> outputQueue;
+
+    while (!stringStack.empty()) {
+        tempStack.push(stringStack.top());
+        stringStack.pop();
+    }
+
+    while (!tempStack.empty()) {
+        outputQueue.push(tempStack.top());
+        tempStack.pop();
+    }
+
+    return outputQueue;
+}
+
+void parse_word_definition(std::stack<std::string> word_def_stack){
+    std::map<std::string, std::function<void(std::stack<std::string>&)>> word_func = create_word_map();
+    while (!word_def_stack.empty()){
+        std::string current = word_def_stack.top();
+        word_def_stack.pop();
+        if (word_func.find(current) != word_func.end()){
+            word_func[current](word_def_stack);
+        } else {
+            word_def_stack.push(current);
+            std::queue<std::string> word_def_queue = stack_to_queue(word_def_stack);
+            token_separator(word_def_stack, word_def_queue);
+            break;
+        }
+    } 
+}
+
 
 void printStack(std::stack<int>& int_stack) {
     std::stack<int> temp_stack;
@@ -139,7 +222,7 @@ void printStack(std::stack<int>& int_stack) {
     // Transfer elements back to the original stack and collect them for output
     while (!temp_stack.empty()) {
         int top_element = temp_stack.top();
-        items.push_back(top_element);  // Collect elements in reverse order
+        items.push_back(top_element);  
         int_stack.push(top_element);
         temp_stack.pop();
     }
@@ -167,18 +250,19 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
         if (typeMap.find(current) != typeMap.end()){
             token_type_t val = typeMap[current];
             if (val == token_type_t::SYMBOL){
-                std::cout << "SYMBOL!\n";
-            } else if (val == token_type_t::BOOLEAN){
-                std::cout << "BOOLEAN!\n";
+             
+                if (func_str_map.find(current) != func_str_map.end()){
+                    func_str_map[current](stringStack);
+                }
+                break;
             } else if (val == token_type_t::OPERATOR){
-                //std::cout << "OPERATOR\n";
                 if (funcMap.find(current) != funcMap.end()){
                     funcMap[current](intStack);
                     //printStack(intStack);
-                    
+                   
                 }
             } else if (typeMap[current] == token_type_t::WORD){
-                //std::cout<< "hello" <<std::endl;
+                
                 //this is to add value to variable
                 if (stringQueue.back() == "!"){
                     intStack.pop();
@@ -190,13 +274,15 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     //std::cout << "uhoh" << std::endl;
                 }
 
-                
+
                 //checks for instance of "variable", if so create variable
                 if (func_str_map.find(current) != func_str_map.end()){
-                    std::cout << "Calling function for: " << current << std::endl;
+                    //std::cout << "Calling function for: " << current << std::endl;
                     func_str_map[current](stringStack);
                     
                 }
+
+                
                 
                 //this is to retrieve variable value
                 if (stringQueue.back() == "@") {
@@ -205,12 +291,15 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     int var_value = variable_map[var1];
                     intStack.push(var_value);
 
+                //prints out variable value
                 } else if (stringQueue.back() == "?"){
                     std::string var1 = stringQueue.front();
                     stringQueue.pop();
                     int var_value = variable_map[var1];
                     std::cout<<var_value<<std::endl;
 
+                    
+                //updates variable value
                 } else if (stringQueue.back() == "+!"){
                     intStack.pop();
                     int increase = std::stoi(stringQueue.front());
@@ -227,7 +316,13 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
         } else if (checkDigits(current)){
                 int num = std::stoi(current);
                 intStack.push(num);
+                stringQueue.pop();
+                //std::cout<<"even more confusde"<<std::endl;
+                //std::cout<<stringQueue.front()<<std::endl;
+                
         } else if (stringStack.size() == 0){
+
+            //handles calls of just variable
             if (variable_map.find(current) != variable_map.end()){
                 auto it = variable_map.find(current);
                 if (it != variable_map.end()){
@@ -241,15 +336,26 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     //std::cout<<key_address<<std::endl;
                     //intStack.push(std::stoi(key_address);
                 }   
-            } 
+            }
+          //handles calls of just constant
         } else if (constant_map.find(current) != constant_map.end()){
             int value = constant_map[current];
             intStack.push(value);
-        }
+        } else if (word_definition_map.find(current) != word_definition_map.end()){
+              stringQueue.pop();
+              parse_word_definition(word_definition_map[current]);
+        }   
 
     }
+
+    std::string current = stringQueue.front();
+    if (word_definition_map.find(current) != word_definition_map.end()){
+              stringQueue.pop();
+              
+              parse_word_definition(word_definition_map[current]);
+    }
+   
     printStack(intStack);
-    //(intStack);
     
 }
 
@@ -271,31 +377,6 @@ std::stack<std::string> queue_to_stack(std::queue<std::string> test_queue){
 
 
 }
-
-/*
-int main(){ 
-
-    std::string input = "variable bean";
-    std::queue<std::string> test_queue;
-    std::istringstream iss(input);
-    std::string token;
-    while (iss >> token) {
-        test_queue.push(token);
-    }
-
-    std::stack<std::string> final_stack = queue_to_stack(test_queue);
-    token_separator(final_stack, test_queue);
-
-    std::string input2 = "bean @";
-    std::queue<std::string> test_queue2;
-    test_queue2.push("bean");
-    test_queue2.push("@");
-    //std::cout<<test_queue2.back()<<std::endl;
-    std::stack<std::string> final_stack2 = queue_to_stack(test_queue2);
-    token_separator(final_stack2, test_queue2);
-    return 0;
-}
-*/
 
 
 
