@@ -66,6 +66,7 @@ bool checkDigits(std::string test){
 
 std::map<std::string, int> variable_map;
 std::map<std::string, int> constant_map;
+std::map<std::string, std::stack<std::string>> word_definition_map;
 std::stack<int> intStack;
 
 void make_variable(std::stack<std::string>& str_stack) {
@@ -92,6 +93,45 @@ void make_constant(std::stack<std::string>& str_stack) {
 
     }
 
+}
+
+void make_word_definition(std::stack<std::string>& str_stack) {
+    std::string word_name = str_stack.top();
+    str_stack.pop();
+
+    word_definition_map[word_name] = str_stack;
+}
+
+void print_word(std::stack<std::string>& str_stack){
+    // Hello there!" ;
+    std::string final = "";
+    while(!str_stack.empty()){
+        final += str_stack.top();
+        str_stack.pop();
+
+        // there!" ;
+        std::queue<std::string> new_queue;
+        while(str_stack.top() != ";" && !str_stack.empty()){
+            new_queue.push(str_stack.top());
+            str_stack.pop();
+        }
+
+        //pop ;
+        str_stack.pop();
+
+        //there!"
+        while(new_queue.size() > 1){
+            std::cout<<new_queue.front()<<std::endl;
+            new_queue.pop();
+        }
+
+        std::string last_string = new_queue.front();
+        last_string.pop_back();
+
+        final += " " + last_string;
+    }
+
+    std::cout<<final<<std::endl;
 }
 
 std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int() {
@@ -125,9 +165,26 @@ std::map<std::string, std::function<void(std::stack<std::string>&)>> create_func
     std::map<std::string, std::function<void(std::stack<std::string>&)>> func_str_map;
     func_str_map["variable"] = make_variable;
     func_str_map["constant"] = make_constant;
+    func_str_map[":"] = make_word_definition;
     return func_str_map;
 }
 
+std::map<std::string, std::function<void(std::stack<std::string>&)>> create_word_map() {
+    std::map<std::string, std::function<void(std::stack<std::string>&)>> word_def_map;
+    word_def_map[".\""] = print_word;
+    return word_def_map;
+}
+
+void parse_word_definition(std::stack<std::string> word_def_stack){
+    std::map<std::string, std::function<void(std::stack<std::string>&)>> word_func = create_word_map();
+    while (!word_def_stack.empty()){
+        std::string current = word_def_stack.top();
+        word_def_stack.pop();
+        if (word_func.find(current) != word_func.end()){
+            word_func[current](word_def_stack);
+        }
+    }
+}
 void printStack(std::stack<int>& int_stack) {
     std::stack<int> temp_stack;
     std::vector<int> items;
@@ -169,7 +226,10 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
         if (typeMap.find(current) != typeMap.end()){
             token_type_t val = typeMap[current];
             if (val == token_type_t::SYMBOL){
-                std::cout << "SYMBOL!\n";
+             
+                if (func_str_map.find(current) != func_str_map.end()){
+                    func_str_map[current](stringStack);
+                }
             } else if (val == token_type_t::OPERATOR){
                 if (funcMap.find(current) != funcMap.end()){
                     funcMap[current](intStack);
@@ -192,7 +252,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
 
                 //checks for instance of "variable", if so create variable
                 if (func_str_map.find(current) != func_str_map.end()){
-                    std::cout << "Calling function for: " << current << std::endl;
+                    //std::cout << "Calling function for: " << current << std::endl;
                     func_str_map[current](stringStack);
                     
                 }
@@ -255,6 +315,12 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
         }
 
     }
+
+    std::string current = stringQueue.front();
+    if (word_definition_map.find(current) != word_definition_map.end()){
+            stringQueue.pop();
+            parse_word_definition(word_definition_map[current]);
+    } 
     printStack(intStack);
     //(intStack);
     
