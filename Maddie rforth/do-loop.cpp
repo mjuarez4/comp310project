@@ -49,6 +49,14 @@ public:
 };
 
 
+class PrintIndexNode : public Node {
+public:
+    void evaluate() override {
+        // Intentionally left empty. The action for this node is handled by LoopNode.
+    }
+};
+
+
 class LoopNode : public Node {
     int start, end;
     std::vector<std::unique_ptr<Node>> body;
@@ -78,7 +86,11 @@ public:
         for (int i = start; i < end; ++i) {
             //std::cout << "Loop iteration: " << i << std::endl;
             for (auto& node : body) {
+		if (dynamic_cast<PrintIndexNode*>(node.get()) != nullptr) {
+                    std::cout << i << " "; // Print the loop index
+                } else {
                 node->evaluate();
+                }
            }
         }
         std::cout << "Ending loop evaluation from " << start << " to " << end << std::endl;
@@ -92,6 +104,7 @@ public:
     }
 
 };
+
 
 std::vector<Token> getTokens(const std::string& input) {
     std::vector<Token> tokens;
@@ -110,24 +123,21 @@ std::vector<Token> getTokens(const std::string& input) {
 
         if (inString) {
             currentToken += ch;
-        } else if (std::isspace(ch) || ch == ';' || ch == ':') {
+        } else if (std::isspace(ch)) {
             if (!currentToken.empty()) {
                 TokenType type = std::isdigit(currentToken[0]) ? TokenType::Number : TokenType::Identifier;
                 tokens.push_back({type, currentToken});
                 currentToken.clear();
             }
-            if (ch == ';' || ch == ':') {
-                tokens.push_back({TokenType::Symbol, std::string(1, ch)});
-            }
-        } else if (std::isalnum(ch) || ch == '-') {
-            currentToken += ch;
-        } else {
+        } else if (ch == ';' || ch == ':') {
             if (!currentToken.empty()) {
                 TokenType type = std::isdigit(currentToken[0]) ? TokenType::Number : TokenType::Identifier;
                 tokens.push_back({type, currentToken});
                 currentToken.clear();
             }
             tokens.push_back({TokenType::Symbol, std::string(1, ch)});
+        } else {
+            currentToken += ch;
         }
     }
 
@@ -155,31 +165,35 @@ int safeStoi(const std::string& str) {
     }
 }
 
+
 std::unique_ptr<LoopNode> parseLoop(const std::vector<Token>& tokens, size_t& current_position, int start, int end) {
     auto loopNode = std::make_unique<LoopNode>(start, end);
-    //std::cout << "Parsing loop body from position " << current_position << " with new LoopNode at: " << loopNode.get() << std::endl;
+    bool lastTokenWasI = false;
 
     while (current_position < tokens.size() && tokens[current_position].value != "loop") {
         const auto& token = tokens[current_position];
 
-        if (token.type == TokenType::Number) {
-            int value = safeStoi(token.value);
-            //std::cout << "Adding print node with number value: " << value << std::endl;
-            loopNode->addNode(std::make_unique<PrintNode>(value));
-        } else if (token.type == TokenType::String) {
-            //std::cout << "Adding print node with string value: " << token.value << std::endl;
-            loopNode->addNode(std::make_unique<PrintStringNode>(token.value));
+        if (lastTokenWasI && token.value == ".") {
+            // Add a special node that handles the printing of the current loop index
+            loopNode->addNode(std::make_unique<PrintIndexNode>());
+            lastTokenWasI = false;
+        } else {
+            lastTokenWasI = false;  // Reset the flag
+            if (token.value == "i" && token.type == TokenType::Identifier) {
+                lastTokenWasI = true;  // Set the flag if 'i' is encountered
+            } else if (token.type == TokenType::Number) {
+                loopNode->addNode(std::make_unique<PrintNode>(safeStoi(token.value)));
+            } else if (token.type == TokenType::String) {
+                loopNode->addNode(std::make_unique<PrintStringNode>(token.value));
+            }
         }
         current_position++;
     }
 
     if (current_position >= tokens.size() || tokens[current_position].value != "loop") {
-        //std::cerr << "Error: Loop not properly terminated with 'loop' keyword at position " << current_position << std::endl;
         throw std::runtime_error("Missing 'loop' keyword to close loop construct.");
     }
-    current_position++; // Move past the 'loop' token
-
-    //std::cout << "Ending loop body parsing at position " << current_position << std::endl;
+    current_position++;
     return loopNode;
 }
 
@@ -232,8 +246,10 @@ void testNodes() {
 
 int main() {
     testNodes();
-    std::string input = ": test 10 0 do \"This is a string in the body of the loop\" loop ;";
+    //std::string input = ": test 10 0 do \"This is a string in the body of the loop\" loop ;";
     //std::string input = ": test 10 0 do 52 34 68 loop ;";
+    std::string input = ": test 20 0 do i . loop ;";
+    
 
     auto tokens = getTokens(input);
 
