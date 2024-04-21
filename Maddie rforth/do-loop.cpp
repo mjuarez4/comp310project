@@ -27,7 +27,8 @@ public:
     int getValue() const { return value; } 
 
     void evaluate() override {
-        std::cout << "Evaluating PrintNode with value: " << value << std::endl;
+        //std::cout << "Evaluating PrintNode with value: " << value << std::endl;
+        std::cout << value << std::endl;
         std::cout.flush(); 
     }
 };
@@ -41,7 +42,8 @@ public:
     const std::string& getValue() const { return value; } 
 
     void evaluate() override {
-        std::cout << "Evaluating PrintStringNode with string: " << value << std::endl;
+        //std::cout << "Evaluating PrintStringNode with string: " << value << std::endl;
+        std::cout << value << std::endl;
         std::cout.flush();  
     }
 };
@@ -54,37 +56,42 @@ public:
     LoopNode(int start, int end) : start(start), end(end) {}
 
     void addNode(std::unique_ptr<Node> node) {
-    	std::cout << "Adding node to loop body, type: " << typeid(*node).name() << std::endl;
-    	if (typeid(*node) == typeid(LoopNode)) {
-        	std::cerr << "Attempting to add LoopNode to another LoopNode, which is not allowed." << std::endl;
-        	return; 
-    	}
-    	body.push_back(std::move(node));
+        //std::cout << "Attempting to add node of type: " << typeid(*node).name() << std::endl;
+        // Check if the type is exactly LoopNode and disallow if it's the same as this
+        if (node.get() == this) {
+            //std::cerr << "Attempt to add LoopNode to itself blocked." << std::endl;
+        } else {
+            //std::cout << "LoopNode address in addNode: " << this << std::endl;
+            body.push_back(std::move(node));
+            //std::cout << "Node added. Current body size: " << body.size() << std::endl;
+        }
     }
 
 
+
     void evaluate() override {
+        //std::cout << "LoopNode address in evaluate: " << this << std::endl;
         std::cout << "Starting loop evaluation from " << start << " to " << end << std::endl;
+        if (body.empty()) {
+            std::cout << "Warning: No nodes to evaluate in loop body." << std::endl;
+        }
         for (int i = start; i < end; ++i) {
-            std::cout << "Loop iteration: " << i << std::endl;
+            //std::cout << "Loop iteration: " << i << std::endl;
             for (auto& node : body) {
-                std::cout << "About to evaluate node: " << typeid(*node).name() << " containing ";
-                if (typeid(*node) == typeid(PrintNode)) {
-                    std::cout << "number " << dynamic_cast<PrintNode*>(node.get())->getValue() << std::endl;
-                } else if (typeid(*node) == typeid(PrintStringNode)) {
-                    std::cout << "string " << dynamic_cast<PrintStringNode*>(node.get())->getValue() << std::endl;
-               }
-               node->evaluate();
-            }
+                node->evaluate();
+           }
         }
         std::cout << "Ending loop evaluation from " << start << " to " << end << std::endl;
     }
 
+    void transferNodesFrom(std::unique_ptr<LoopNode>& source) {
+        while (!source->body.empty()) {
+            addNode(std::move(source->body.back()));
+            source->body.pop_back();
+        }
+    }
+
 };
-
-
-std::unique_ptr<LoopNode> parseLoop(const std::vector<Token>& tokens, size_t& current_position, int start, int end);
-
 
 std::vector<Token> getTokens(const std::string& input) {
     std::vector<Token> tokens;
@@ -133,8 +140,6 @@ std::vector<Token> getTokens(const std::string& input) {
 }
 
 
-
-
 int safeStoi(const std::string& str) {
     try {
         if (str.empty() || !std::all_of(str.begin(), str.end(), [](char c) { return std::isdigit(c) || c == '-'; })) {
@@ -150,31 +155,31 @@ int safeStoi(const std::string& str) {
     }
 }
 
-
-
 std::unique_ptr<LoopNode> parseLoop(const std::vector<Token>& tokens, size_t& current_position, int start, int end) {
     auto loopNode = std::make_unique<LoopNode>(start, end);
-    std::cout << "Parsing loop body..." << std::endl;
+    //std::cout << "Parsing loop body from position " << current_position << " with new LoopNode at: " << loopNode.get() << std::endl;
 
     while (current_position < tokens.size() && tokens[current_position].value != "loop") {
-        if (tokens[current_position].type == TokenType::Number) {
-            int value = safeStoi(tokens[current_position].value);
-            std::cout << "Adding print node with number value: " << value << std::endl;
+        const auto& token = tokens[current_position];
+
+        if (token.type == TokenType::Number) {
+            int value = safeStoi(token.value);
+            //std::cout << "Adding print node with number value: " << value << std::endl;
             loopNode->addNode(std::make_unique<PrintNode>(value));
-            current_position++;
-        } else if (tokens[current_position].type == TokenType::String) {
-            std::cout << "Adding print node with string value: " << tokens[current_position].value << std::endl;
-            loopNode->addNode(std::make_unique<PrintStringNode>(tokens[current_position].value));
-            current_position++;
-        } else {
-            current_position++; 
+        } else if (token.type == TokenType::String) {
+            //std::cout << "Adding print node with string value: " << token.value << std::endl;
+            loopNode->addNode(std::make_unique<PrintStringNode>(token.value));
         }
+        current_position++;
     }
 
     if (current_position >= tokens.size() || tokens[current_position].value != "loop") {
+        //std::cerr << "Error: Loop not properly terminated with 'loop' keyword at position " << current_position << std::endl;
         throw std::runtime_error("Missing 'loop' keyword to close loop construct.");
     }
-    current_position++; 
+    current_position++; // Move past the 'loop' token
+
+    //std::cout << "Ending loop body parsing at position " << current_position << std::endl;
     return loopNode;
 }
 
@@ -183,8 +188,8 @@ std::unique_ptr<Node> parseFunction(const std::vector<Token>& tokens, size_t& cu
     if (tokens[current_position].type != TokenType::Symbol || tokens[current_position].value != ":") {
         throw std::runtime_error("Expected ':' at the start of a function definition");
     }
-    current_position++; 
-    
+    current_position++;
+
     if (tokens[current_position].type != TokenType::Identifier) {
         throw std::runtime_error("Expected function name after ':'");
     }
@@ -203,29 +208,33 @@ std::unique_ptr<Node> parseFunction(const std::vector<Token>& tokens, size_t& cu
     if (tokens[current_position].value != "do") {
         throw std::runtime_error("Expected 'do' keyword for starting a loop");
     }
-    current_position++; 
+    current_position++;
 
     auto functionNode = std::make_unique<LoopNode>(startIndex, endIndex);
-    functionNode->addNode(parseLoop(tokens, current_position, startIndex, endIndex));
+    auto nestedLoopNode = parseLoop(tokens, current_position, startIndex, endIndex);
+
+    functionNode->transferNodesFrom(nestedLoopNode);
 
     if (tokens[current_position].value != ";") {
         throw std::runtime_error("Function definition not properly closed with ';'");
     }
-    current_position++; 
+    current_position++;
     return functionNode;
 }
 
 void testNodes() {
     // Test each node type
     PrintNode pn(5);
-    PrintStringNode psn("Hello");
+    PrintStringNode psn("Hello there");
     pn.evaluate(); // Should print "Printing value: 5"
     psn.evaluate(); // Should print "Printing string: Hello"
 }
 
 int main() {
     testNodes();
-    std::string input = ": test 15 0 do 5 \"Hello\" loop ;";
+    std::string input = ": test 10 0 do \"This is a string in the body of the loop\" loop ;";
+    //std::string input = ": test 10 0 do 52 34 68 loop ;";
+
     auto tokens = getTokens(input);
 
     // Display each token and its type
@@ -254,4 +263,5 @@ int main() {
     return 0;
 }
 */
+
 
