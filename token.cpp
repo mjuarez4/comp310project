@@ -64,6 +64,7 @@ bool checkDigits(std::string test){
 }
 
 
+
 std::map<std::string, int> variable_map;
 std::map<std::string, int> constant_map;
 std::map<std::string, std::stack<std::string>> word_definition_map;
@@ -135,6 +136,27 @@ void print_word(std::stack<std::string>& str_stack){
     std::cout<<final<<std::endl;
 }
 
+std::queue<std::string> stack_to_queue(std::stack<std::string> stringStack){
+    std::stack<std::string> tempStack;
+    std::queue<std::string> outputQueue;
+
+    while (!stringStack.empty()) {
+        tempStack.push(stringStack.top());
+        stringStack.pop();
+    }
+
+    while (!tempStack.empty()) {
+        outputQueue.push(tempStack.top());
+        tempStack.pop();
+    }
+
+    return outputQueue;
+}
+
+
+
+
+
 void do_loop(std::stack<std::string> stringStack){
     // 10 0 do i . loop ;
 
@@ -161,9 +183,25 @@ void do_loop(std::stack<std::string> stringStack){
     if (looped_queue.front() == "i"){
             //pop i
             looped_queue.pop();
+            stringStack.pop();
             // pop .
-            looped_queue.pop();
 
+            if (looped_queue.front() == "."){
+                for (int i = start; i < end; i++) {
+                    std::cout << i << " " << final_val << std::endl;
+                }
+            } else {
+                for (int i = start; i < end; i++){
+                    std::string str = std::to_string(i);
+                    std::stack<std::string> stack1;
+                    stack1.push(str);
+                    std::queue<std::string> queue1 = stack_to_queue(stack1);
+                    token_separator(stack1, queue1);
+                }
+            }
+            //looped_queue.pop();
+
+            /*
             std::string luke = looped_queue.front();
 
             while(!looped_queue.empty()){
@@ -174,18 +212,22 @@ void do_loop(std::stack<std::string> stringStack){
                 }
                 
             }
-
-            for (int i = start; i < end; i++) {
-                std::cout << i << " " << final_val << std::endl;
-            }
+            */
+            
     } else{
 
+        std::stack<std::string> stack1 = queue_to_stack(looped_queue);
+        
+        for (int i = start; i < end; i++){
 
-        for (int i = start; i < end; i++) {
-                std::cout << i << std::endl;
+                        //std::stack<std::string> stack1;
+                        //stack1.push(luke);
+                        //std::queue<std::string> queue1 = stack_to_queue(stack1);
+                        token_separator(stack1, looped_queue);
+                        //stack1.pop();
         }
+        
     }
-
    
 }
 
@@ -228,26 +270,12 @@ std::map<std::string, std::function<void(std::stack<std::string>&)>> create_word
     std::map<std::string, std::function<void(std::stack<std::string>&)>> word_def_map;
     word_def_map[".\""] = print_word; 
     word_def_map["do"] = do_loop;
+    //word_def_map["."] = print_num;
 
     return word_def_map;
 }
 
-std::queue<std::string> stack_to_queue(std::stack<std::string> stringStack){
-    std::stack<std::string> tempStack;
-    std::queue<std::string> outputQueue;
 
-    while (!stringStack.empty()) {
-        tempStack.push(stringStack.top());
-        stringStack.pop();
-    }
-
-    while (!tempStack.empty()) {
-        outputQueue.push(tempStack.top());
-        tempStack.pop();
-    }
-
-    return outputQueue;
-}
 
 void parse_word_definition(std::stack<std::string> word_def_stack){
     std::map<std::string, std::function<void(std::stack<std::string>&)>> word_func = create_word_map();
@@ -271,37 +299,6 @@ void parse_word_definition(std::stack<std::string> word_def_stack){
 
 
 }
-
-
-void printStack(std::stack<int>& int_stack) {
-    std::stack<int> temp_stack;
-    std::vector<int> items;
-
-    // Transfer elements from the original stack to a temporary stack
-    while (!int_stack.empty()) {
-        temp_stack.push(int_stack.top());
-        int_stack.pop();
-    }
-
-    // Transfer elements back to the original stack and collect them for output
-    while (!temp_stack.empty()) {
-        int top_element = temp_stack.top();
-        items.push_back(top_element);  
-        int_stack.push(top_element);
-        temp_stack.pop();
-    }
-
-    // Print the collected elements in the desired format
-    std::cout << "Stack: [";
-    for (size_t i = 0; i < items.size(); ++i) {
-        if (i > 0) {
-            std::cout << ", ";
-        }
-        std::cout << items[i];
-    }
-    std::cout << "] <- Top" << std::endl;
-}
-
 
 void token_separator(std::stack<std::string> stringStack, std::queue<std::string> stringQueue){
     std::map<std::string, token_type_t> typeMap = create_type_map();
@@ -436,6 +433,36 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
     
 }
 
+void printStack(std::stack<int>& int_stack) {
+    std::stack<int> temp_stack;
+    std::vector<int> items;
+
+    // Transfer elements from the original stack to a temporary stack
+    while (!int_stack.empty()) {
+        temp_stack.push(int_stack.top());
+        int_stack.pop();
+    }
+
+    // Transfer elements back to the original stack and collect them for output
+    while (!temp_stack.empty()) {
+        int top_element = temp_stack.top();
+        items.push_back(top_element);  
+        int_stack.push(top_element);
+        temp_stack.pop();
+    }
+
+    // Print the collected elements in the desired format
+    std::cout << "Stack: [";
+    for (size_t i = 0; i < items.size(); ++i) {
+        if (i > 0) {
+            std::cout << ", ";
+        }
+        std::cout << items[i];
+    }
+    std::cout << "] <- Top" << std::endl;
+}
+
+
 std::stack<std::string> queue_to_stack(std::queue<std::string> test_queue){
     std::stack<std::string> stack1;
     std::stack<std::string> stack2;
@@ -454,6 +481,7 @@ std::stack<std::string> queue_to_stack(std::queue<std::string> test_queue){
 
 
 }
+
 
 
 
