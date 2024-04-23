@@ -32,8 +32,12 @@ to test input instead of compiling the user interface every time)
 
 Completed:
 -- basic operations (+, -, dup, swap, etc.)
--- variable declaration and operation (!, @, +!)
+-- variable declaration, constants, and operation (!, @, +!)
+-- add booleans (<, >, and, etc.)
+--interactive feature
+-- word definitions (functions)
+-- do loops
+-- if else then
+-- arrays
 
 To do:
--- add booleans (<, >, and, etc.)
-
