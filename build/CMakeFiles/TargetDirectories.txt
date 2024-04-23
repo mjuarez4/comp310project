@@ -1,0 +1,3 @@
+/Users/maddiejuarez/Documents/comp310/comp310project/build/CMakeFiles/r-forth.dir
+/Users/maddiejuarez/Documents/comp310/comp310project/build/CMakeFiles/edit_cache.dir
+/Users/maddiejuarez/Documents/comp310/comp310project/build/CMakeFiles/rebuild_cache.dir
