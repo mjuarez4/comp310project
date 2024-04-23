@@ -218,7 +218,7 @@ void do_loop(std::stack<std::string> stringStack){
 
         std::stack<std::string> stack1 = queue_to_stack(looped_queue);
         
-        for (int i = start; i < end; i++){
+        for (int i = start; i < end - 1; i++){
 
                         //std::stack<std::string> stack1;
                         //stack1.push(luke);
