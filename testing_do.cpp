@@ -70,6 +70,11 @@ int main(){
 
 
     //funcMap["do"] = do_loop;
+
+    // i . 5 loop ;
+
+    //0 5
+    //1 5
     string_stack.push(";");
     string_stack.push("loop");
     string_stack.push("5");

@@ -410,18 +410,27 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
         } else if (word_definition_map.find(current) != word_definition_map.end()){
               stringQueue.pop();
               parse_word_definition(word_definition_map[current]);
-        } 
+        }
+
+        std::map<std::string, std::function<void(std::stack<std::string>&)>> word_func = create_word_map();
+
+
+        //do i . loop ;
+        if (word_func.find(current) != word_func.end()){
+            word_func[current](stringStack);
+        }
 
     }
 
     std::string current = stringQueue.front();
 
-
+    //this is the variable/function map
     if (word_definition_map.find(current) != word_definition_map.end()){
               stringQueue.pop();
             
               parse_word_definition(word_definition_map[current]);
-    }  
+    }
+
    
     printStack(intStack);
     
