@@ -103,38 +103,45 @@ void make_word_definition(std::stack<std::string>& str_stack) {
     word_definition_map[word_name] = str_stack;
 }
 
+
+
 void print_word(std::stack<std::string>& str_stack){
     // Hello there!" ;
+ 
     std::string final = "";
-    while(!str_stack.empty()){
-        final += str_stack.top();
-        str_stack.pop();
+    std::queue<std::string> new_queue;
+    while(str_stack.size()>1){
 
         // there!" ;
-        std::queue<std::string> new_queue;
-        while(str_stack.top() != ";" && !str_stack.empty()){
+        //std::cout<<str_stack.top()<<std::endl;
+        if (str_stack.top() != "loop"){
             new_queue.push(str_stack.top());
             str_stack.pop();
+        } else {
+            str_stack.pop();
         }
-
-        //pop ;
-        str_stack.pop();
-
-        //there!"
-        while(new_queue.size() > 1){
-            //std::cout<<new_queue.front()<<std::endl;
-            final += " " + new_queue.front();
-            new_queue.pop();
-        }
-
-        std::string last_string = new_queue.front();
-        last_string.pop_back();
-
-        final += " " + last_string;
     }
 
+    while(new_queue.size() > 1){
+            //std::cout<<new_queue.front()<<std::endl;
+            final += new_queue.front() + " ";
+            new_queue.pop();
+            //std::cout<<"florida"<<std::endl;
+    }
+
+    //::cout<<"huh"<<std::endl;
+    std::string last_string = new_queue.front();
+    last_string.pop_back();
+
+    final += last_string;
+    
+       
+
     std::cout<<final<<std::endl;
+    
 }
+
+
 
 std::queue<std::string> stack_to_queue(std::stack<std::string> stringStack){
     std::stack<std::string> tempStack;
@@ -171,7 +178,6 @@ void do_loop(std::stack<std::string> stringStack){
         stringStack.pop();
         looped_queue.push(current);
     }
-
     int start = intStack.top();
     intStack.pop();
 
@@ -185,11 +191,17 @@ void do_loop(std::stack<std::string> stringStack){
             looped_queue.pop();
             stringStack.pop();
             // pop .
-
+            
             if (looped_queue.front() == "."){
+                intStack.push(0);
+                //looped_queue.pop();
                 for (int i = start; i < end; i++) {
-                    std::cout << i << " " << final_val << std::endl;
+                    final_val += std::to_string(i) + " ";
                 }
+                final_val.pop_back();
+                std::cout <<final_val<< std::endl;
+
+               
             } else {
                 for (int i = start; i < end; i++){
                     std::string str = std::to_string(i);
@@ -216,16 +228,18 @@ void do_loop(std::stack<std::string> stringStack){
             
     } else{
 
-        std::stack<std::string> stack1 = queue_to_stack(looped_queue);
-        
-        for (int i = start; i < end; i++){
+          std::stack<std::string> stack1 = queue_to_stack(looped_queue);
+          
+          for (int i = start; i < end - 1; i++){
 
                         //std::stack<std::string> stack1;
                         //stack1.push(luke);
                         //std::queue<std::string> queue1 = stack_to_queue(stack1);
                         token_separator(stack1, looped_queue);
                         //stack1.pop();
-        }
+            }
+        
+        
         
     }
    
@@ -304,6 +318,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
     std::map<std::string, token_type_t> typeMap = create_type_map();
     std::map<std::string, std::function<void(std::stack<int>&)>> funcMap = create_func_map_int();
     std::map<std::string, std::function<void(std::stack<std::string>&)>> func_str_map = create_func_map_str();
+    std::map<std::string, std::function<void(std::stack<std::string>&)>> word_func = create_word_map();
     while (!stringStack.empty()){
         std::string current = stringStack.top();
         //std::cout<<"HUH"<<std::endl;
@@ -407,15 +422,19 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
         } else if (word_definition_map.find(current) != word_definition_map.end()){
               stringQueue.pop();
               parse_word_definition(word_definition_map[current]);
+        } else if (word_func.find(current) != word_func.end()){
+            word_func[current](stringStack);
         }
 
-        std::map<std::string, std::function<void(std::stack<std::string>&)>> word_func = create_word_map();
+        
 
 
         //do i . loop ;
+        /*
         if (word_func.find(current) != word_func.end()){
             word_func[current](stringStack);
         }
+        */
 
     }
 
