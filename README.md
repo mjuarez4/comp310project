@@ -30,6 +30,10 @@ to test input instead of compiling the user interface every time)
 -- added compatability for variables and constants
 -- re-added interactivity on command line
 
+Functionality: Luke 4/18
+-- loops are working independently of the rest of the codebase
+-- ability to print out the number of each iteration, values, and strings
+
 Completed:
 -- basic operations (+, -, dup, swap, etc.)
 -- variable declaration, constants, and operation (!, @, +!)
@@ -37,7 +41,7 @@ Completed:
 --interactive feature
 -- word definitions (functions)
 -- do loops
--- if else then
--- arrays
 
 To do:
+-- if else then
+-- arrays
