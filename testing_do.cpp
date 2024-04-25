@@ -71,7 +71,7 @@ int main(){
 
     //funcMap["do"] = do_loop;
 
-    // i . 5 loop ;
+    //do i . 5 loop ;
 
     //0 5
     //1 5
