@@ -245,6 +245,101 @@ void do_loop(std::stack<std::string> stringStack){
    
 }
 
+void if_then_else(std::stack<std::string>& stringStack) {
+    //std::cout << "Better make it here" << std::endl;
+    // Get front stack value and remove it from the int stack
+    int boolean = intStack.top();
+    intStack.pop();
+
+    //Check that front stack value is a boolean
+    if (boolean != 0 && boolean != -1) {
+        std::cout << "Top Stack Value is not a boolean.\nIf Statement Not Ran." << std::endl;
+        return;
+    }
+
+    std::string current = stringStack.top();
+    stringStack.pop();
+
+    //std::cout << "Worked like its supposed to (get first value and store in current)" << std::endl;
+
+    //If true, run all if commands and skip then commands
+    if (boolean) {
+        //std::cout << "Apparently True" << std::endl;
+        //Run all instructions in if clause
+        std::stack<std::string> if_string_stack;
+        while (current != "else" && current != "then" && stringStack.size() != 0) {
+            if_string_stack.push(current);
+            current = stringStack.top();
+            stringStack.pop();
+        }
+        std::queue<std::string> if_string_queue = stack_to_queue(if_string_stack);
+        token_separator(if_string_stack, if_string_queue);
+        /*std::string if_instructions = "";
+        while(!if_string_queue.empty()) {
+            if_instructions += " " + if_string_queue.front();
+            if_string_queue.pop();
+        }*/
+        //std::cout << "Executing if instructions: " << if_instructions << std::endl;
+        
+
+
+        //If else clause is next, skip all its instructions
+        if (current == "else") {
+            //std::cout << "Found else" << std::endl;
+            current = stringStack.top();
+            stringStack.pop();
+            while (current != "then" &&  stringStack.size() != 0) {
+                current = stringStack.top();
+                stringStack.pop();
+            }
+        }
+
+    //If false, run all else commands, if found
+    } else {
+        //std::cout << "Apparently False" << std::endl;
+        //Skip all if instructions
+        while (current != "else" && current != "then" && stringStack.size() != 0) {
+            current = stringStack.top();
+            stringStack.pop();
+            //std::cout << "Got a token from if block: " << current << std::endl;
+        }
+
+        //If else clause is next, run all its instructions
+        if (current == "else") {
+            current = stringStack.top();
+            stringStack.pop();
+            std::stack<std::string> else_string_stack;
+            while (current != "then" && stringStack.size() != 0) {
+                else_string_stack.push(current);
+                current = stringStack.top();
+                stringStack.pop();
+                //std::cout << "Got a token from else block: " << current << std::endl;
+            }
+            std::queue<std::string> else_string_queue = stack_to_queue(else_string_stack);
+            token_separator(else_string_stack, else_string_queue);
+            /*std::string else_instructions = "";
+            while(!else_string_queue.empty()) {
+                else_instructions += " " + else_string_queue.front();
+                else_string_queue.pop();
+            }*/
+            //std::cout << "Executing else instructions: " << else_instructions << std::endl;
+        }
+    }
+
+    //Once then is reached or no instructions are left, return the string stack to token_separator
+    /*std::queue<std::string> stringQueue = stack_to_queue(stringStack);/////////////////
+    //std::cout<<"Sending rest to token separator"<<std::endl;
+    token_separator(stringStack, stringQueue);
+    std::string rest_instructions = "";
+    while(!stringQueue.empty()) {
+        rest_instructions += " " + stringQueue.front();
+        stringQueue.pop();
+    }*/
+    //std::cout << "Executing rest of instructions: " << rest_instructions << std::endl;
+    //Remove then if it remains
+
+}
+
 std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int() {
     std::map<std::string, std::function<void(std::stack<int>&)>> funcMap;
     funcMap["+"] = addition;
@@ -284,6 +379,7 @@ std::map<std::string, std::function<void(std::stack<std::string>&)>> create_word
     std::map<std::string, std::function<void(std::stack<std::string>&)>> word_def_map;
     word_def_map[".\""] = print_word; 
     word_def_map["do"] = do_loop;
+    word_def_map["if"] = if_then_else;
     //word_def_map["."] = print_num;
 
     return word_def_map;
@@ -322,7 +418,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
     while (!stringStack.empty()){
         std::string current = stringStack.top();
         //std::cout<<"HUH"<<std::endl;
-        //std::cout<<current<<std::endl;
+        std::cout<<"Running: "<<current<<std::endl;
         stringStack.pop();
         if (typeMap.find(current) != typeMap.end()){
             token_type_t val = typeMap[current];
