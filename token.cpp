@@ -171,13 +171,28 @@ void do_loop(std::stack<std::string> stringStack){
 
 
     std::queue<std::string> looped_queue;
-    std::string current = stringStack.top();
+    
+
+    while (!stringStack.empty()){
+        std::string current = stringStack.top();
+        if (current != "loop" && current != ";"){
+            current = stringStack.top();
+            stringStack.pop();
+            looped_queue.push(current);
+        } else {
+            stringStack.pop();
+        }
+    }
+    /*
 
     while(current != "loop"){
         current = stringStack.top();
         stringStack.pop();
         looped_queue.push(current);
     }
+    */
+
+    std::cout<<looped_queue.back()<<std::endl;
     int start = intStack.top();
     intStack.pop();
 
@@ -230,7 +245,7 @@ void do_loop(std::stack<std::string> stringStack){
 
           std::stack<std::string> stack1 = queue_to_stack(looped_queue);
           
-          for (int i = start; i < end - 1; i++){
+          for (int i = start; i < end; i++){
 
                         //std::stack<std::string> stack1;
                         //stack1.push(luke);
@@ -343,9 +358,11 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                 
                 //this is to add value to variable
                 if (stringQueue.back() == "!"){
+                    
+                    int value = intStack.top();
+                    //std::string string1 = stringQueue.front();
+                    //std::cout<<string1<<std::endl;
                     intStack.pop();
-                    int value = std::stoi(stringQueue.front());
-                    stringQueue.pop();
                     variable_map[stringQueue.front()] = value;
                     stringQueue.pop();
                     stringQueue.pop();
@@ -361,14 +378,12 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                 }
 
                 
-                
                 //this is to retrieve variable value
                 if (stringQueue.back() == "@") {
                     std::string var1 = stringQueue.front();
                     stringQueue.pop();
                     int var_value = variable_map[var1];
                     intStack.push(var_value);
-
                 //prints out variable value
                 } else if (stringQueue.back() == "?"){
                     std::string var1 = stringQueue.front();
@@ -400,7 +415,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                 
         } else if (stringStack.size() == 0){
 
-            //handles calls of just variable
+            //handles calls of just variable address
             if (variable_map.find(current) != variable_map.end()){
                 auto it = variable_map.find(current);
                 if (it != variable_map.end()){
