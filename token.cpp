@@ -130,6 +130,7 @@ void make_word_definition(std::stack<std::string>& str_stack) {
 
 
 
+/*
 void print_word(std::stack<std::string>& str_stack){
     // Hello there!" ;
  
@@ -139,7 +140,7 @@ void print_word(std::stack<std::string>& str_stack){
 
         // there!" ;
         //std::cout<<str_stack.top()<<std::endl;
-        if (str_stack.top() != "loop"){
+        if (str_stack.top() != "loop" && str_stack.top() != "else" && str_stack.top() != ";"){
             new_queue.push(str_stack.top());
             str_stack.pop();
         } else {
@@ -148,7 +149,7 @@ void print_word(std::stack<std::string>& str_stack){
     }
 
     //std::cout<<new_queue.front()<<std::endl;
-    while(new_queue.size() > 1){
+    while(new_queue.size() > 0){
             //std::cout<<new_queue.front()<<std::endl;
             final += new_queue.front() + " ";
             new_queue.pop();
@@ -165,6 +166,27 @@ void print_word(std::stack<std::string>& str_stack){
 
     std::cout<<final<<std::endl;
     
+}
+*/
+void print_word(std::stack<std::string>& str_stack) {
+    std::string final = "";
+
+    // Directly build the string from the stack, respecting order from top to bottom
+    while (!str_stack.empty()) {
+        std::string word = str_stack.top();
+        str_stack.pop();
+
+        // Check for unwanted keywords
+        if (word != "loop" && word != "else" && word != ";") {
+            // Handle the specific case for the topmost word
+            if (word.back() == '"') {
+                word.pop_back();  // Remove the trailing quote
+            }
+            final += (final.empty() ? "" : " ") + word;  // Append word with spacing
+        }
+    }
+
+    std::cout << final << std::endl;
 }
 
 
@@ -312,6 +334,8 @@ void if_then_else(std::stack<std::string>& stringStack) {
             if_string_stack.pop();
         }
 
+        
+
         //std::cout<<if_string_stack_new.top()<<std::endl;
 
         
@@ -346,20 +370,29 @@ void if_then_else(std::stack<std::string>& stringStack) {
 
 
         //If else clause is next, skip all its instructions
+
+        
         if (current == "else") {
             //std::cout << "Found else" << std::endl;
-            current = stringStack.top();
+            
+            //current = stringStack.top();
             stringStack.pop();
-            while (current != "then" &&  stringStack.size() != 0) {
+            while (stringStack.size() != 0) {
                 current = stringStack.top();
                 stringStack.pop();
             }
+            
+            
         }
+        
+
+        
 
     //If false, run all else commands, if found
     } else {
         //std::cout << "Apparently False" << std::endl;
         //Skip all if instructions
+        
         stringStack.push(current);
         while (current != "else" && current != "then" && stringStack.size() != 0) {
             current = stringStack.top();
@@ -378,28 +411,33 @@ void if_then_else(std::stack<std::string>& stringStack) {
                 stringStack.pop();
                 //std::cout << "Got a token from else block: " << current << std::endl;
             }
-            std::queue<std::string> else_string_queue = stack_to_queue(else_string_stack);
-            token_separator(else_string_stack, else_string_queue);
-            /*std::string else_instructions = "";
-            while(!else_string_queue.empty()) {
-                else_instructions += " " + else_string_queue.front();
-                else_string_queue.pop();
-            }*/
-            //std::cout << "Executing else instructions: " << else_instructions << std::endl;
+
+            
+            std::stack<std::string> else_string_stack_new;
+
+            while (!else_string_stack.empty()){
+                else_string_stack_new.push(else_string_stack.top());
+                else_string_stack.pop();
+            }
+
+
+
+            //std::queue<std::string> else_string_queue = stack_to_queue(else_string_stack);
+
+
+            std::queue<std::string> else_string_queue = stack_to_queue(else_string_stack_new);
+            std::stack<std::string> else_temp = queue_to_stack(else_string_queue);
+            std::queue<std::string> else_final = stack_to_queue(else_temp);
+
+            //std::cout<<else_string_stack_new.top()<<std::endl;
+
+            
+            token_separator(else_string_stack_new, else_final);
+
+
+
         }
     }
-
-    //Once then is reached or no instructions are left, return the string stack to token_separator
-    /*std::queue<std::string> stringQueue = stack_to_queue(stringStack);/////////////////
-    //std::cout<<"Sending rest to token separator"<<std::endl;
-    token_separator(stringStack, stringQueue);
-    std::string rest_instructions = "";
-    while(!stringQueue.empty()) {
-        rest_instructions += " " + stringQueue.front();
-        stringQueue.pop();
-    }*/
-    //std::cout << "Executing rest of instructions: " << rest_instructions << std::endl;
-    //Remove then if it remains
 
 }
 
@@ -695,6 +733,8 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
               parse_word_definition(word_definition_map[current]);
         } else if (word_func.find(current) != word_func.end()){
             word_func[current](stringStack);
+        } else {
+            std::cout<<"not a valid entry"<<std::endl;
         }
 
         
