@@ -139,7 +139,7 @@ void print_word(std::stack<std::string>& str_stack){
 
         // there!" ;
         //std::cout<<str_stack.top()<<std::endl;
-        if (str_stack.top() != "loop"){
+        if (str_stack.top() != "loop" && str_stack.top() != "then"){
             new_queue.push(str_stack.top());
             str_stack.pop();
         } else {
@@ -147,6 +147,7 @@ void print_word(std::stack<std::string>& str_stack){
         }
     }
 
+    //std::cout<<new_queue.front()<<std::endl;
     while(new_queue.size() > 1){
             //std::cout<<new_queue.front()<<std::endl;
             final += new_queue.front() + " ";
@@ -283,8 +284,10 @@ void if_then_else(std::stack<std::string>& stringStack) {
         return;
     }
 
+
     std::string current = stringStack.top();
     stringStack.pop();
+    //std::cout<<current<<std::endl;
 
     //std::cout << "Worked like its supposed to (get first value and store in current)" << std::endl;
 
@@ -292,14 +295,47 @@ void if_then_else(std::stack<std::string>& stringStack) {
     if (boolean) {
         //std::cout << "Apparently True" << std::endl;
         //Run all instructions in if clause
+        //stringStack.push(current);
+        //std::cout<<current<<std::endl;
         std::stack<std::string> if_string_stack;
+        std::stack<std::string> if_string_stack_new;
+        //if_string_stack.push(current);
         while (current != "else" && current != "then" && stringStack.size() != 0) {
             if_string_stack.push(current);
             current = stringStack.top();
             stringStack.pop();
         }
-        std::queue<std::string> if_string_queue = stack_to_queue(if_string_stack);
-        token_separator(if_string_stack, if_string_queue);
+
+        
+        while (!if_string_stack.empty()){
+            if_string_stack_new.push(if_string_stack.top());
+            if_string_stack.pop();
+        }
+
+        //std::cout<<if_string_stack_new.top()<<std::endl;
+
+        
+
+        //std::cout<<if_string_stack.top()<<std::endl;
+
+
+        std::queue<std::string> if_string_queue = stack_to_queue(if_string_stack_new);
+        std::stack<std::string> if_temp = queue_to_stack(if_string_queue);
+        std::queue<std::string> if_final = stack_to_queue(if_temp);
+
+        /*
+        while (!if_final.empty()){
+            std::cout<<if_final.front()<<std::endl;
+            if_final.pop();
+
+        }
+        */
+
+        std::cout<<if_string_stack_new.top()<<std::endl;
+        std::cout<<if_final.front()<<std::endl;
+        token_separator(if_string_stack_new, if_final);
+
+
         /*std::string if_instructions = "";
         while(!if_string_queue.empty()) {
             if_instructions += " " + if_string_queue.front();
@@ -324,6 +360,7 @@ void if_then_else(std::stack<std::string>& stringStack) {
     } else {
         //std::cout << "Apparently False" << std::endl;
         //Skip all if instructions
+        stringStack.push(current);
         while (current != "else" && current != "then" && stringStack.size() != 0) {
             current = stringStack.top();
             stringStack.pop();
@@ -445,7 +482,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
     while (!stringStack.empty()){
         std::string current = stringStack.top();
         //std::cout<<"HUH"<<std::endl;
-        //std::cout<<"Running: "<<current<<std::endl;
+        std::cout<<"Running: "<<current<<std::endl;
         stringStack.pop();
         if (typeMap.find(current) != typeMap.end()){
             token_type_t val = typeMap[current];
