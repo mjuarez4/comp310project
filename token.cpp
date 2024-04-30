@@ -192,7 +192,7 @@ void do_loop(std::stack<std::string> stringStack){
     }
     */
 
-    std::cout<<looped_queue.back()<<std::endl;
+    //std::cout<<looped_queue.front()<<std::endl;
     int start = intStack.top();
     intStack.pop();
 
@@ -204,7 +204,9 @@ void do_loop(std::stack<std::string> stringStack){
     if (looped_queue.front() == "i"){
             //pop i
             looped_queue.pop();
-            stringStack.pop();
+
+            //std::cout<<looped_queue.front()<<std::endl;
+            //stringStack.pop();
             // pop .
             
             if (looped_queue.front() == "."){
@@ -226,32 +228,16 @@ void do_loop(std::stack<std::string> stringStack){
                     token_separator(stack1, queue1);
                 }
             }
-            //looped_queue.pop();
-
-            /*
-            std::string luke = looped_queue.front();
-
-            while(!looped_queue.empty()){
-                std::string extra = looped_queue.front();
-                looped_queue.pop();
-                if (extra != "loop" && extra != ";"){
-                    final_val += extra;
-                }
-                
-            }
-            */
+            
             
     } else{
 
           std::stack<std::string> stack1 = queue_to_stack(looped_queue);
           
-          for (int i = start; i < end; i++){
+          for (int i = start; i < end - 1; i++){
 
-                        //std::stack<std::string> stack1;
-                        //stack1.push(luke);
-                        //std::queue<std::string> queue1 = stack_to_queue(stack1);
                         token_separator(stack1, looped_queue);
-                        //stack1.pop();
+            
             }
         
         
