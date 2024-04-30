@@ -56,9 +56,17 @@ std::map<std::string, token_type_t> create_type_map(){
     
 }
 
-bool checkDigits(std::string test){
-    for (char ch: test){
-        if (!isdigit(ch)){
+bool checkDigits(std::string test) {
+    if (test.empty()) return false;  
+    
+    int start = 0;
+    if (test[0] == '-') {  
+        if (test.size() == 1) return false;  
+        start = 1;  
+    }
+
+    for (int i = start; i < test.size(); i++) {
+        if (!isdigit(test[i])) {
             return false;
         }
     }
