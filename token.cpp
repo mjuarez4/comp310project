@@ -108,8 +108,6 @@ void make_array_name(std::stack<std::string>& str_stack){
 
 void make_constant(std::stack<std::string>& str_stack) {
     while (!str_stack.empty()) {
-        //int val1 = std::stoi(str_stack.top());
-        //get name of constant
         int const_val = intStack.top();
         intStack.pop();
 
@@ -128,46 +126,6 @@ void make_word_definition(std::stack<std::string>& str_stack) {
     word_definition_map[word_name] = str_stack;
 }
 
-
-
-/*
-void print_word(std::stack<std::string>& str_stack){
-    // Hello there!" ;
- 
-    std::string final = "";
-    std::queue<std::string> new_queue;
-    while(str_stack.size()>1){
-
-        // there!" ;
-        //std::cout<<str_stack.top()<<std::endl;
-        if (str_stack.top() != "loop" && str_stack.top() != "else" && str_stack.top() != ";"){
-            new_queue.push(str_stack.top());
-            str_stack.pop();
-        } else {
-            str_stack.pop();
-        }
-    }
-
-    //std::cout<<new_queue.front()<<std::endl;
-    while(new_queue.size() > 0){
-            //std::cout<<new_queue.front()<<std::endl;
-            final += new_queue.front() + " ";
-            new_queue.pop();
-            //std::cout<<"florida"<<std::endl;
-    }
-
-    //::cout<<"huh"<<std::endl;
-    std::string last_string = new_queue.front();
-    last_string.pop_back();
-
-    final += last_string;
-    
-       
-
-    std::cout<<final<<std::endl;
-    
-}
-*/
 void print_word(std::stack<std::string>& str_stack) {
     std::string final = "";
 
@@ -177,7 +135,7 @@ void print_word(std::stack<std::string>& str_stack) {
         str_stack.pop();
 
         // Check for unwanted keywords
-        if (word != "loop" && word != "else" && word != ";") {
+        if (word != "loop" && word != "else" && word != ";" && word != "thens" && word != ".") {
             // Handle the specific case for the topmost word
             if (word.back() == '"') {
                 word.pop_back();  // Remove the trailing quote
@@ -209,15 +167,8 @@ std::queue<std::string> stack_to_queue(std::stack<std::string> stringStack){
 }
 
 
-
-
-
 void do_loop(std::stack<std::string> stringStack){
-    // 10 0 do i . loop ;
-
-    //i . loop ;
-
-
+    
     std::queue<std::string> looped_queue;
     
 
@@ -231,42 +182,30 @@ void do_loop(std::stack<std::string> stringStack){
             stringStack.pop();
         }
     }
-    /*
 
-    while(current != "loop"){
-        current = stringStack.top();
-        stringStack.pop();
-        looped_queue.push(current);
+    int start = 0;
+    int end = 0;
+    if (intStack.size() >= 2) {
+        start = intStack.top();
+        intStack.pop();
+
+        end = intStack.top();
+        intStack.pop();
     }
-    */
 
-    //std::cout<<looped_queue.front()<<std::endl;
-    int start = intStack.top();
-    intStack.pop();
-
-    int end = intStack.top();
-    intStack.pop();
+    
 
     std::string final_val = "";
 
     if (looped_queue.front() == "i"){
-            //pop i
             looped_queue.pop();
-
-            //std::cout<<looped_queue.front()<<std::endl;
-            //stringStack.pop();
-            // pop .
-            
             if (looped_queue.front() == "."){
                 intStack.push(0);
-                //looped_queue.pop();
                 for (int i = start; i < end; i++) {
                     final_val += std::to_string(i) + " ";
                 }
                 final_val.pop_back();
                 std::cout <<final_val<< std::endl;
-
-               
             } else {
                 for (int i = start; i < end; i++){
                     std::string str = std::to_string(i);
@@ -278,29 +217,23 @@ void do_loop(std::stack<std::string> stringStack){
             }
             
             
+            
     } else{
-
           std::stack<std::string> stack1 = queue_to_stack(looped_queue);
           
           for (int i = start; i < end - 1; i++){
-
-                        token_separator(stack1, looped_queue);
+              token_separator(stack1, looped_queue);
             
-            }
-        
-        
-        
+          }
+
     }
    
 }
 
 void if_then_else(std::stack<std::string>& stringStack) {
-    //std::cout << "Better make it here" << std::endl;
-    // Get front stack value and remove it from the int stack
     int boolean = intStack.top();
     intStack.pop();
 
-    //Check that front stack value is a boolean
     if (boolean != 0 && boolean != -1) {
         std::cout << "Top Stack Value is not a boolean.\nIf Statement Not Ran." << std::endl;
         return;
@@ -309,19 +242,11 @@ void if_then_else(std::stack<std::string>& stringStack) {
 
     std::string current = stringStack.top();
     stringStack.pop();
-    //std::cout<<current<<std::endl;
-
-    //std::cout << "Worked like its supposed to (get first value and store in current)" << std::endl;
-
-    //If true, run all if commands and skip then commands
+    
     if (boolean) {
-        //std::cout << "Apparently True" << std::endl;
-        //Run all instructions in if clause
-        //stringStack.push(current);
-        //std::cout<<current<<std::endl;
         std::stack<std::string> if_string_stack;
         std::stack<std::string> if_string_stack_new;
-        //if_string_stack.push(current);
+        
         while (current != "else" && stringStack.size() != 0) {
             if_string_stack.push(current);
             current = stringStack.top();
@@ -334,48 +259,14 @@ void if_then_else(std::stack<std::string>& stringStack) {
             if_string_stack.pop();
         }
 
-        
-
-        //std::cout<<if_string_stack_new.top()<<std::endl;
-
-        
-
-        //std::cout<<if_string_stack.top()<<std::endl;
-
-
         std::queue<std::string> if_string_queue = stack_to_queue(if_string_stack_new);
         std::stack<std::string> if_temp = queue_to_stack(if_string_queue);
         std::queue<std::string> if_final = stack_to_queue(if_temp);
 
-        /*
-        while (!if_final.empty()){
-            std::cout<<if_final.front()<<std::endl;
-            if_final.pop();
-
-        }
-        */
-
-        //std::cout<<if_string_stack_new.top()<<std::endl;
-        //std::cout<<if_final.front()<<std::endl;
         token_separator(if_string_stack_new, if_final);
 
-
-        /*std::string if_instructions = "";
-        while(!if_string_queue.empty()) {
-            if_instructions += " " + if_string_queue.front();
-            if_string_queue.pop();
-        }*/
-        //std::cout << "Executing if instructions: " << if_instructions << std::endl;
-        
-
-
-        //If else clause is next, skip all its instructions
-
-        
         if (current == "else") {
-            //std::cout << "Found else" << std::endl;
             
-            //current = stringStack.top();
             stringStack.pop();
             while (stringStack.size() != 0) {
                 current = stringStack.top();
@@ -388,19 +279,17 @@ void if_then_else(std::stack<std::string>& stringStack) {
 
         
 
-    //If false, run all else commands, if found
+
     } else {
-        //std::cout << "Apparently False" << std::endl;
-        //Skip all if instructions
         
         stringStack.push(current);
         while (current != "else" && current != "then" && stringStack.size() != 0) {
             current = stringStack.top();
             stringStack.pop();
-            //std::cout << "Got a token from if block: " << current << std::endl;
+           
         }
 
-        //If else clause is next, run all its instructions
+        
         if (current == "else") {
             current = stringStack.top();
             stringStack.pop();
@@ -409,7 +298,7 @@ void if_then_else(std::stack<std::string>& stringStack) {
                 else_string_stack.push(current);
                 current = stringStack.top();
                 stringStack.pop();
-                //std::cout << "Got a token from else block: " << current << std::endl;
+                
             }
 
             
@@ -420,18 +309,10 @@ void if_then_else(std::stack<std::string>& stringStack) {
                 else_string_stack.pop();
             }
 
-
-
-            //std::queue<std::string> else_string_queue = stack_to_queue(else_string_stack);
-
-
             std::queue<std::string> else_string_queue = stack_to_queue(else_string_stack_new);
             std::stack<std::string> else_temp = queue_to_stack(else_string_queue);
             std::queue<std::string> else_final = stack_to_queue(else_temp);
 
-            //std::cout<<else_string_stack_new.top()<<std::endl;
-
-            
             token_separator(else_string_stack_new, else_final);
 
 
@@ -519,8 +400,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
     std::map<std::string, std::function<void(std::stack<std::string>&)>> word_func = create_word_map();
     while (!stringStack.empty()){
         std::string current = stringStack.top();
-        //std::cout<<"HUH"<<std::endl;
-        //std::cout<<"Running: "<<current<<std::endl;
+       
         stringStack.pop();
         if (typeMap.find(current) != typeMap.end()){
             token_type_t val = typeMap[current];
@@ -534,32 +414,24 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
             } else if (val == token_type_t::OPERATOR){
                 if (funcMap.find(current) != funcMap.end()){
                     funcMap[current](intStack);
-                    //printStack(intStack);
                    
                 }
             } else if (typeMap[current] == token_type_t::WORD){
                 if (stringQueue.back() == "!"){
 
-                  
-                    
-                    //std::cout<<stringQueue.front()<<std::endl;
-                    //
                     int value = intStack.top();
 
-
-                    //std::string string1 = stringQueue.front();
-                    //std::cout<<string1<<std::endl;
                     intStack.pop();
                     variable_map[stringQueue.front()] = value;
                     stringQueue.pop();
                     stringQueue.pop();
-                    //std::cout << "uhoh" << std::endl;
+                    
                     
                 }
                 
-                //checks for instance of "variable", if so create variable
+                
                 if (func_str_map.find(current) != func_str_map.end()){
-                    //std::cout << "Calling function for: " << current << std::endl;
+                    
                     func_str_map[current](stringStack);
                     
                 }
@@ -571,7 +443,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
 		        if (current == "cells" && stringStack.top() == "allot" && !intStack.empty()) {
 			        int cell_count = intStack.top();
 			        intStack.pop();
-			        stringStack.pop(); //this is "allot"
+			        stringStack.pop();
 			        std::string variable_name = stringStack.top();
 		                if (variable_array_map.find(variable_name) != variable_array_map.end()) {
 			            make_array(cell_count, variable_name);
@@ -579,9 +451,6 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
 		        }
 			    	
 			
-
-                
-                //this is to retrieve variable value
                 if (stringQueue.back() == "@") {
                     std::string variable_name = stringQueue.front();
                     stringQueue.pop();
@@ -590,11 +459,14 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                          int var_value = variable_map[variable_name];
                          intStack.push(var_value);
                     } else if (variable_array_map.find(variable_name) != variable_array_map.end()){
-                        //0 bean @
-                        int index_val = intStack.top();
-                        intStack.pop();
-                        //get 0
 
+                        int index_val = 0;
+
+                        if (intStack.size() > 0){
+                            index_val = intStack.top();
+                            intStack.pop();
+                        }
+    
                         std::vector<int> get_array = variable_array_map[variable_name];
                         int value_at_index = get_array[index_val];
 
@@ -605,71 +477,55 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                        
                         //pop +!
                     }
-                    /*
-                    std::string var1 = stringQueue.front();
-                    stringQueue.pop();
-                    int var_value = variable_map[var1];
-                    intStack.push(var_value);
-                    */
-                //prints out variable value
+                    
                 } else if (stringQueue.back() == "?"){
                     std::string variable_name = stringQueue.front();
                     stringQueue.pop();
                     
                     if (variable_map.find(variable_name) != variable_map.end()){
                          int var_value = variable_map[variable_name];
-                         //intStack.push(var_value);
+                         
                          std::cout<<var_value<<std::endl;
                     } else if (variable_array_map.find(variable_name) != variable_array_map.end()){
-                        //0 bean @
+                        
                         int index_val = intStack.top();
                         intStack.pop();
-                        //get 0
-
+                        
                         std::vector<int> get_array = variable_array_map[variable_name];
                         int value_at_index = get_array[index_val];
 
-                        //intStack.push(value_at_index);
                         std::cout<<value_at_index<<std::endl;
 
                         stringQueue.pop();
-                        //pop @
                        
-                        //pop +!
                     }
                     
 
-                    
-                //updates variable value
                 } else if (stringQueue.back() == "+!"){
                     std::string variable_name = stringQueue.front();
                     stringQueue.pop();
 
 
                     if (variable_map.find(variable_name) != variable_map.end()){
-                            //intStack.pop();
+                            
                         int increase = intStack.top();
                         intStack.pop();
 
-                        //std::cout<<stringQueue.front()<<std::endl;
-                        //stringQueue.pop();
-                        //variable name
                         int current_val = variable_map[variable_name];
                         variable_map[variable_name] = current_val + increase;
-                        //stringQueue.pop();
+                        
                         stringQueue.pop();
                     } else if (variable_array_map.find(variable_name) != variable_array_map.end()){
-                        //bean + !
-                        // 10 0
-                        
+                        int index_val = 0;
+                        int val_replace = 0;
+                        if (intStack.size() >= 2) {                         
+                            index_val = intStack.top();
+                            intStack.pop();
 
-                        int index_val = intStack.top();
-                        intStack.pop();
-                        
+                            val_replace = intStack.top();
+                            intStack.pop();
+                        }
 
-                        int val_replace = intStack.top();
-                        intStack.pop();
-                        
 
                         std::vector<int> get_array = variable_array_map[variable_name];
                         get_array[index_val] = val_replace;
@@ -681,21 +537,9 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                         std::string string1 = stringQueue.front();
                         stringQueue.pop();
                        
-                        //pop +!
+                        
                     }
-                    /*
-                    //intStack.pop();
-                    int increase = intStack.top();
-                    intStack.pop();
-
-                    //std::cout<<stringQueue.front()<<std::endl;
-                    //stringQueue.pop();
-                    //variable name
-                    int current_val = variable_map[stringQueue.front()];
-                    variable_map[stringQueue.front()] = current_val + increase;
-                    stringQueue.pop();
-                    stringQueue.pop();
-                    */
+                    
                 }
                 
                 
@@ -704,12 +548,10 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                 int num = std::stoi(current);
                 intStack.push(num);
                 stringQueue.pop();
-                //std::cout<<"even more confusde"<<std::endl;
-                //std::cout<<stringQueue.front()<<std::endl;
+                
                 
         } else if (stringStack.size() == 0){
 
-            //handles calls of just variable address
             if (variable_map.find(current) != variable_map.end()){
                 auto it = variable_map.find(current);
                 if (it != variable_map.end()){
@@ -720,11 +562,10 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     int address_as_int = static_cast<int>(numeric_address);
 
                     intStack.push(address_as_int);
-                    //std::cout<<key_address<<std::endl;
-                    //intStack.push(std::stoi(key_address);
+                    
                 }   
             }
-          //handles calls of just constant
+          
         } else if (constant_map.find(current) != constant_map.end()){
             int value = constant_map[current];
             intStack.push(value);
@@ -733,25 +574,11 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
               parse_word_definition(word_definition_map[current]);
         } else if (word_func.find(current) != word_func.end()){
             word_func[current](stringStack);
-        } else {
-            std::cout<<"not a valid entry"<<std::endl;
-        }
-
-        
-
-
-        //do i . loop ;
-        /*
-        if (word_func.find(current) != word_func.end()){
-            word_func[current](stringStack);
-        }
-        */
+        } 
 
     }
 
     std::string current = stringQueue.front();
-
-    //this is the variable/function map
     if (word_definition_map.find(current) != word_definition_map.end()){
               stringQueue.pop();
             
@@ -767,13 +594,12 @@ void printStack(std::stack<int>& int_stack) {
     std::stack<int> temp_stack;
     std::vector<int> items;
 
-    // Transfer elements from the original stack to a temporary stack
     while (!int_stack.empty()) {
         temp_stack.push(int_stack.top());
         int_stack.pop();
     }
 
-    // Transfer elements back to the original stack and collect them for output
+    
     while (!temp_stack.empty()) {
         int top_element = temp_stack.top();
         items.push_back(top_element);  
@@ -781,7 +607,7 @@ void printStack(std::stack<int>& int_stack) {
         temp_stack.pop();
     }
 
-    // Print the collected elements in the desired format
+   
     std::cout << "Stack: [";
     for (size_t i = 0; i < items.size(); ++i) {
         if (i > 0) {

@@ -12,6 +12,11 @@
 std::stack<int> myStack;
 
 std::stack<int> addition(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
+    }
+    
     int val1 = intStack.top();
     intStack.pop();
     int val2 = intStack.top();
@@ -22,6 +27,10 @@ std::stack<int> addition(std::stack<int>& intStack){
 }
 
 std::stack<int> subtraction(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
+    }
     int val1 = intStack.top();
     intStack.pop();
     int val2 = intStack.top();
@@ -32,6 +41,10 @@ std::stack<int> subtraction(std::stack<int>& intStack){
 }
 
 std::stack<int> multiplication(std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
+    }
     int val1 = intStack.top();
     intStack.pop();
     int val2 = intStack.top();
@@ -42,6 +55,10 @@ std::stack<int> multiplication(std::stack<int>& intStack){
 }
 
 std::stack<int> division (std::stack<int>& intStack){
+    if (intStack.size() < 2){
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
+    }
     int val1 = intStack.top();
     intStack.pop();
     int val2 = intStack.top();
@@ -52,13 +69,18 @@ std::stack<int> division (std::stack<int>& intStack){
 }
 
 std::stack<int> pop_item(std::stack<int>& intStack){
+    if (intStack.size() < 1){
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
+    }
     intStack.pop();
     return intStack;
 }
 
 std::stack<int> dup(std::stack<int>& intStack){
     if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
     int val1 = intStack.top();
     intStack.pop();
@@ -69,7 +91,8 @@ std::stack<int> dup(std::stack<int>& intStack){
 
 std::stack<int> swap(std::stack<int>& intStack){
     if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
     int val1 = intStack.top();
     intStack.pop();
@@ -84,7 +107,8 @@ std::stack<int> swap(std::stack<int>& intStack){
 
 std::stack<int> over(std::stack<int>& intStack){
     if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
 
     int val1 = intStack.top();
@@ -100,7 +124,8 @@ std::stack<int> over(std::stack<int>& intStack){
 
 std::stack<int> rot(std::stack<int>& intStack){
     if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
     int val1 = intStack.top();
     intStack.pop();
@@ -116,8 +141,9 @@ std::stack<int> rot(std::stack<int>& intStack){
 }
 
 std::stack<int> two_swap(std::stack<int>& intStack){
-    if (intStack.size() < 4){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+    if (intStack.size() < 2){
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
     int val1 = intStack.top();
     intStack.pop();
@@ -137,7 +163,8 @@ std::stack<int> two_swap(std::stack<int>& intStack){
 
 std::stack<int> two_over(std::stack<int>& intStack){
     if (intStack.size() < 4){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
     int val1 = intStack.top();
     intStack.pop();
@@ -159,7 +186,8 @@ std::stack<int> two_over(std::stack<int>& intStack){
 
 std::stack<int> two_dup(std::stack<int>& intStack){
     if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
     int val1 = intStack.top();
     intStack.pop();
@@ -175,7 +203,8 @@ std::stack<int> two_dup(std::stack<int>& intStack){
 
 std::stack<int> mod(std::stack<int>& intStack){
     if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
     int val1 = intStack.top();
     intStack.pop();
@@ -190,7 +219,8 @@ std::stack<int> mod(std::stack<int>& intStack){
 
 std::stack<int> div_mod(std::stack<int>& intStack){
     if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
 
     std::cout << intStack.top() << std::endl;
@@ -208,7 +238,8 @@ std::stack<int> div_mod(std::stack<int>& intStack){
 
 std::stack<int> equality(std::stack<int>& intStack){
     if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
     int val1 = intStack.top();
     intStack.pop();
@@ -225,7 +256,8 @@ std::stack<int> equality(std::stack<int>& intStack){
 
 std::stack<int> less(std::stack<int>& intStack){
     if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
     int val1 = intStack.top();
     intStack.pop();
@@ -243,9 +275,9 @@ std::stack<int> less(std::stack<int>& intStack){
 
 std::stack<int> greater(std::stack<int>& intStack){
     if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
-
 
     int val1 = intStack.top();
     intStack.pop();
@@ -262,10 +294,9 @@ std::stack<int> greater(std::stack<int>& intStack){
 
 std::stack<int> and_comp(std::stack<int>& intStack){
     if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
-
-    //std::cout<<intStack.top()<<std::endl;
     int val1 = intStack.top();
     intStack.pop();
     int val2 = intStack.top();
@@ -281,10 +312,9 @@ std::stack<int> and_comp(std::stack<int>& intStack){
 
 std::stack<int> or_comp(std::stack<int>& intStack){
     if (intStack.size() < 2){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
-
-    //std::cout<<intStack.top()<<std::endl;
     int val1 = intStack.top();
     intStack.pop();
     int val2 = intStack.top();
@@ -300,7 +330,8 @@ std::stack<int> or_comp(std::stack<int>& intStack){
 
 std::stack<int> invert(std::stack<int>& intStack){
     if (intStack.size() < 1){
-        throw std::runtime_error("Need at least two elements in the stack to swap.");
+        std::cout<<"stack underflow"<<std::endl;
+        return intStack;
     }
 
     //std::cout<<intStack.top()<<std::endl;
