@@ -442,6 +442,8 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                 if (stringQueue.back() == "!"){
                     
                     int value = intStack.top();
+
+                    
                     //std::string string1 = stringQueue.front();
                     //std::cout<<string1<<std::endl;
                     intStack.pop();
@@ -476,9 +478,13 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     
                 //updates variable value
                 } else if (stringQueue.back() == "+!"){
+
+                    //intStack.pop();
+                    int increase = intStack.top();
                     intStack.pop();
-                    int increase = std::stoi(stringQueue.front());
-                    stringQueue.pop();
+
+                    //std::cout<<stringQueue.front()<<std::endl;
+                    //stringQueue.pop();
                     //variable name
                     int current_val = variable_map[stringQueue.front()];
                     variable_map[stringQueue.front()] = current_val + increase;
