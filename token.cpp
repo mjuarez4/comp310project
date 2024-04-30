@@ -44,6 +44,7 @@ std::map<std::string, token_type_t> create_type_map(){
 
     //word
     map["variable"] = token_type_t::WORD;
+    map["array"] = token_type_t::WORD;
     map["@"] = token_type_t::WORD;
     map["!"] = token_type_t::WORD;
     map["?"] = token_type_t::WORD;
@@ -86,6 +87,15 @@ void make_array(int size, std::string variable_name) {
     std::vector<int> new_array(size, 0);
     variable_array_map[variable_name] = new_array;
     std::cout << "Array: " << new_array.size() << std::endl;
+}
+
+void make_array_name(std::stack<std::string>& str_stack){
+    std::vector<int> empty_array(1, 0);
+    while (!str_stack.empty()) {
+        std::string val1 = str_stack.top();
+        str_stack.pop();
+        variable_array_map[val1] = empty_array;
+    }
 }
 
 void make_constant(std::stack<std::string>& str_stack) {
@@ -379,6 +389,7 @@ std::map<std::string, std::function<void(std::stack<std::string>&)>> create_func
     std::map<std::string, std::function<void(std::stack<std::string>&)>> func_str_map;
     func_str_map["variable"] = make_variable;
     func_str_map["constant"] = make_constant;
+    func_str_map["array"] = make_array_name;
     func_str_map[":"] = make_word_definition;
     return func_str_map;
 }
@@ -426,7 +437,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
     while (!stringStack.empty()){
         std::string current = stringStack.top();
         //std::cout<<"HUH"<<std::endl;
-        std::cout<<"Running: "<<current<<std::endl;
+        //std::cout<<"Running: "<<current<<std::endl;
         stringStack.pop();
         if (typeMap.find(current) != typeMap.end()){
             token_type_t val = typeMap[current];
