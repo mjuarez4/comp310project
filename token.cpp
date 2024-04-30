@@ -139,7 +139,7 @@ void print_word(std::stack<std::string>& str_stack){
 
         // there!" ;
         //std::cout<<str_stack.top()<<std::endl;
-        if (str_stack.top() != "loop" && str_stack.top() != "then"){
+        if (str_stack.top() != "loop"){
             new_queue.push(str_stack.top());
             str_stack.pop();
         } else {
@@ -300,7 +300,7 @@ void if_then_else(std::stack<std::string>& stringStack) {
         std::stack<std::string> if_string_stack;
         std::stack<std::string> if_string_stack_new;
         //if_string_stack.push(current);
-        while (current != "else" && current != "then" && stringStack.size() != 0) {
+        while (current != "else" && stringStack.size() != 0) {
             if_string_stack.push(current);
             current = stringStack.top();
             stringStack.pop();
@@ -331,8 +331,8 @@ void if_then_else(std::stack<std::string>& stringStack) {
         }
         */
 
-        std::cout<<if_string_stack_new.top()<<std::endl;
-        std::cout<<if_final.front()<<std::endl;
+        //std::cout<<if_string_stack_new.top()<<std::endl;
+        //std::cout<<if_final.front()<<std::endl;
         token_separator(if_string_stack_new, if_final);
 
 
@@ -482,7 +482,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
     while (!stringStack.empty()){
         std::string current = stringStack.top();
         //std::cout<<"HUH"<<std::endl;
-        std::cout<<"Running: "<<current<<std::endl;
+        //std::cout<<"Running: "<<current<<std::endl;
         stringStack.pop();
         if (typeMap.find(current) != typeMap.end()){
             token_type_t val = typeMap[current];
