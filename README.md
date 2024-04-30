@@ -14,34 +14,40 @@ To use C++ to reconstruct our foundational construction of forth interpretation 
 Updates:
 
 How to run with C-11 compiler:
- g++ -std=c++11 -o token int_stack.cpp token.cpp r-forth.cpp
- ./token
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_STANDARD=11 -S . -B build
+		cmake --build build
+./build/r-forth
 
 
-Functionality: Maddie 4/17
-* testing with main() in token.cpp (don't worry, this will be removed in the final submission, i just made it easier
+
+Functionality: Maddie 
+-- testing with main() in token.cpp (don't worry, this will be removed in the final submission, i just made it easier
 to test input instead of compiling the user interface every time)
-* added a mapping from token to function
-    *done by token type
-* added a mapping from token to token type
-    * planning on controlling input by checking first if token is a : or ; -> if so, push everything onto a stack and handle
+-- added a mapping from token to function
+    --done by token type
+-- added a mapping from token to token type
+    -- planning on controlling input by checking first if token is a : or ; -> if so, push everything onto a stack and handle
     in custom function (to be built by Nick/Luke)
-* take input as string stack, convert to queue (so that you can see the front/back of input at all times)
-* added compatability for variables and constants
-* re-added interactivity on command line
+-- take input as string stack, convert to queue (so that you can see the front/back of input at all times)
+-- added compatability for variables and constants
+-- re-added interactivity on command line
 
 Functionality: Luke 4/18
-* loops are working independently of the rest of the codebase
-* ability to print out the number of each iteration, values, and strings
+-- loops are working independently of the rest of the codebase
+-- ability to print out the number of each iteration, values, and strings
+-- arrays
+    -- array numbers -> to delcare array
+    -- 3 cells allot numbers -> declare array size
+    -- 10 0 numbers +! -> assigns value 10 to index 0 of array numbers
+    
 
 Completed:
-* basic operations (+, -, dup, swap, etc.)
-*  variable declaration, constants, and operation (!, @, +!)
-* add booleans (<, >, and, etc.)
-* interactive feature
-* word definitions (functions)
-* do loops
-* if/then/else
+-- basic operations (+, -, dup, swap, etc.)
+-- variable declaration, constants, and operation (!, @, +!)
+-- add booleans (<, >, and, etc.)
+--interactive feature
+-- word definitions (functions)
+-- do loops
+-- arrays
+-- if else then
 
-To do:
-* arrays
