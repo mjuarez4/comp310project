@@ -49,6 +49,7 @@ std::map<std::string, token_type_t> create_type_map(){
     map["?"] = token_type_t::WORD;
     map["+!"] = token_type_t::WORD;
     map["constant"] = token_type_t::WORD;
+    map["cells"] = token_type_t::WORD;
 
     return map;
     
@@ -64,7 +65,7 @@ bool checkDigits(std::string test){
 }
 
 
-
+std::map<std::string, std::vector<int>> variable_array_map;
 std::map<std::string, int> variable_map;
 std::map<std::string, int> constant_map;
 std::map<std::string, std::stack<std::string>> word_definition_map;
@@ -79,6 +80,12 @@ void make_variable(std::stack<std::string>& str_stack) {
     }
 
 
+}
+
+void make_array(int size, std::string variable_name) {
+    std::vector<int> new_array(size, 0);
+    variable_array_map[variable_name] = new_array;
+    std::cout << "Array: " << new_array.size() << std::endl;
 }
 
 void make_constant(std::stack<std::string>& str_stack) {
@@ -439,19 +446,58 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
             } else if (typeMap[current] == token_type_t::WORD){
                 
                 //this is to add value to variable
+		/*
                 if (stringQueue.back() == "!"){
                     
                     int value = intStack.top();
-
-                    
-                    //std::string string1 = stringQueue.front();
-                    //std::cout<<string1<<std::endl;
                     intStack.pop();
                     variable_map[stringQueue.front()] = value;
                     stringQueue.pop();
                     stringQueue.pop();
                     //std::cout << "uhoh" << std::endl;
                 }
+		*/
+		
+		
+		if (!stringQueue.empty() && stringQueue.back() == "!") {
+    		    // First, handle the value
+    		    int value = intStack.top();
+    		    intStack.pop();
+
+    		    // Now get the variable name
+    		    std::string variableName = stringQueue.front(); // Assuming 'number' is next in line
+    		    //stringQueue.pop(); // Remove the variable name
+    		    stringQueue.pop(); // Remove '!' from the end
+
+    		    // Handle possible array or standard variable assignment
+    		    if (!stringQueue.empty() && stringQueue.front() == "+") {
+        		stringQueue.pop(); // Remove '+'
+        		if (intStack.empty()) {
+            		    int index = intStack.top(); 
+			    intStack.pop();
+			    std::cout << "Index: " << index << std::endl;
+			    int val = intStack.top(); 
+			    intStack.pop();
+			    std::cout << "Value: " << val << std::endl;
+
+
+
+            		    // Perform array assignment
+            		    if (variable_array_map.find(variableName) != variable_array_map.end() &&
+                		index >= 0 && index < variable_array_map[variableName].size()) {
+                		variable_array_map[variableName][index] = val;
+            		    } else {
+                		std::cerr << "Error: Invalid array operation or index out of bounds." << std::endl;
+            		    }
+        		} else {
+            		    std::cerr << "Error: Index not provided for array assignment." << std::endl;
+        		}
+    		    } else {
+        		// Perform standard variable assignment
+        		variable_map[variableName] = value;
+			stringQueue.pop();
+    		    }
+		}
 
 
                 //checks for instance of "variable", if so create variable
@@ -460,6 +506,39 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     func_str_map[current](stringStack);
                     
                 }
+
+		/*
+		if (current == "cells") {
+                    if (!stringQueue.empty() && stringQueue.back() == "allot") {
+                        stringStack.pop();  // Remove "cells"
+			stringStack.pop(); //remove "allot"
+                        if (!intStack.empty()) {
+                            int cell_count = intStack.top();
+                            intStack.pop();
+                            if (!stringStack.empty()) {
+                                std::string variable_name = stringStack.top();
+                                stringStack.pop();
+                                std::vector<int> new_array(cell_count, 0);
+                                variable_array_map[variable_name] = new_array;
+                            }
+                        } else {
+                            std::cerr << "Error: 'cells' command requires a preceding integer value on the stack." << std::endl;
+                        }
+                    }
+                }
+		*/
+
+		if (current == "cells" && stringStack.top() == "allot" && !intStack.empty()) {
+			int cell_count = intStack.top();
+			intStack.pop();
+			stringStack.pop(); //this is "allot"
+			std::string variable_name = stringStack.top();
+		        if (variable_array_map.find(variable_name) != variable_array_map.end()) {
+			    make_array(cell_count, variable_name);
+			}
+		}
+			    	
+			
 
                 
                 //this is to retrieve variable value
