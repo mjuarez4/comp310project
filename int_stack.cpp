@@ -78,7 +78,7 @@ std::stack<int> pop_item(std::stack<int>& intStack){
 }
 
 std::stack<int> dup(std::stack<int>& intStack){
-    if (intStack.size() < 2){
+    if (intStack.size() < 1){
         std::cout<<"stack underflow"<<std::endl;
         return intStack;
     }
@@ -141,7 +141,7 @@ std::stack<int> rot(std::stack<int>& intStack){
 }
 
 std::stack<int> two_swap(std::stack<int>& intStack){
-    if (intStack.size() < 2){
+    if (intStack.size() < 4){
         std::cout<<"stack underflow"<<std::endl;
         return intStack;
     }
@@ -185,7 +185,7 @@ std::stack<int> two_over(std::stack<int>& intStack){
 }
 
 std::stack<int> two_dup(std::stack<int>& intStack){
-    if (intStack.size() < 2){
+    if (intStack.size() < 4){
         std::cout<<"stack underflow"<<std::endl;
         return intStack;
     }
