@@ -11,6 +11,7 @@
 #include "int_stack.h"
 #include "token.hpp"
 
+//maps for token types
 std::map<std::string, token_type_t> create_type_map(){
     std::map<std::string, token_type_t> map;
     //operator
@@ -56,6 +57,7 @@ std::map<std::string, token_type_t> create_type_map(){
     
 }
 
+//check digits, handles negative instances
 bool checkDigits(std::string test) {
     if (test.empty()) return false;  
     
@@ -74,12 +76,14 @@ bool checkDigits(std::string test) {
 }
 
 
+//maps from variable name to value, or func name to function call
 std::map<std::string, std::vector<int>> variable_array_map;
 std::map<std::string, int> variable_map;
 std::map<std::string, int> constant_map;
 std::map<std::string, std::stack<std::string>> word_definition_map;
 std::stack<int> intStack;
 
+//instantiates variable when created and sets to 0
 void make_variable(std::stack<std::string>& str_stack) {
     
     while (!str_stack.empty()) {
@@ -91,12 +95,14 @@ void make_variable(std::stack<std::string>& str_stack) {
 
 }
 
+//instantiates array when created and sets to empty array of size 0
 void make_array(int size, std::string variable_name) {
     std::vector<int> new_array(size, 0);
     variable_array_map[variable_name] = new_array;
-    std::cout << "Array: " << new_array.size() << std::endl;
+    //std::cout << "Array: " << new_array.size() << std::endl;
 }
 
+//maps array name to array when declared
 void make_array_name(std::stack<std::string>& str_stack){
     std::vector<int> empty_array(1, 0);
     while (!str_stack.empty()) {
@@ -106,6 +112,7 @@ void make_array_name(std::stack<std::string>& str_stack){
     }
 }
 
+//instantiates constant name and maps it to value
 void make_constant(std::stack<std::string>& str_stack) {
     while (!str_stack.empty()) {
         int const_val = intStack.top();
@@ -119,6 +126,7 @@ void make_constant(std::stack<std::string>& str_stack) {
 
 }
 
+//maps word instances to their functions <function name, function stack>
 void make_word_definition(std::stack<std::string>& str_stack) {
     std::string word_name = str_stack.top();
     str_stack.pop();
@@ -126,21 +134,22 @@ void make_word_definition(std::stack<std::string>& str_stack) {
     word_definition_map[word_name] = str_stack;
 }
 
+//prints word/phrase when ." is called
 void print_word(std::stack<std::string>& str_stack) {
     std::string final = "";
 
-    // Directly build the string from the stack, respecting order from top to bottom
+   
     while (!str_stack.empty()) {
         std::string word = str_stack.top();
         str_stack.pop();
 
-        // Check for unwanted keywords
+        
         if (word != "loop" && word != "else" && word != ";" && word != "thens" && word != ".") {
-            // Handle the specific case for the topmost word
+            
             if (word.back() == '"') {
-                word.pop_back();  // Remove the trailing quote
+                word.pop_back();  
             }
-            final += (final.empty() ? "" : " ") + word;  // Append word with spacing
+            final += (final.empty() ? "" : " ") + word; 
         }
     }
 
@@ -149,6 +158,7 @@ void print_word(std::stack<std::string>& str_stack) {
 
 
 
+//converts stack to queue to maintain order
 std::queue<std::string> stack_to_queue(std::stack<std::string> stringStack){
     std::stack<std::string> tempStack;
     std::queue<std::string> outputQueue;
@@ -167,6 +177,7 @@ std::queue<std::string> stack_to_queue(std::stack<std::string> stringStack){
 }
 
 
+//handles calls of 'do'
 void do_loop(std::stack<std::string> stringStack){
     
     std::queue<std::string> looped_queue;
@@ -230,6 +241,7 @@ void do_loop(std::stack<std::string> stringStack){
    
 }
 
+//handles calls for if / then / else inside functions
 void if_then_else(std::stack<std::string>& stringStack) {
     int boolean = intStack.top();
     intStack.pop();
@@ -322,6 +334,7 @@ void if_then_else(std::stack<std::string>& stringStack) {
 
 }
 
+//creates function map to map function call to function, passes in stack to function
 std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int() {
     std::map<std::string, std::function<void(std::stack<int>&)>> funcMap;
     funcMap["+"] = addition;
@@ -349,6 +362,7 @@ std::map<std::string, std::function<void(std::stack<int>&)>> create_func_map_int
     return funcMap;
 }
 
+//creates map that maps variable/constant/array declarations to function that initiates these values
 std::map<std::string, std::function<void(std::stack<std::string>&)>> create_func_map_str() {
     std::map<std::string, std::function<void(std::stack<std::string>&)>> func_str_map;
     func_str_map["variable"] = make_variable;
@@ -358,18 +372,20 @@ std::map<std::string, std::function<void(std::stack<std::string>&)>> create_func
     return func_str_map;
 }
 
+//creates map that maps word functions (print, do loop, if else) to respective functions
 std::map<std::string, std::function<void(std::stack<std::string>&)>> create_word_map() {
     std::map<std::string, std::function<void(std::stack<std::string>&)>> word_def_map;
     word_def_map[".\""] = print_word; 
     word_def_map["do"] = do_loop;
     word_def_map["if"] = if_then_else;
-    //word_def_map["."] = print_num;
+    
 
     return word_def_map;
 }
 
 
-
+//parses functions to see if there is an instance of a word function, if so, pushes the remainder of the stack into
+//word function. if there is no instance of word function, pushes remainder of stack into token_separator
 void parse_word_definition(std::stack<std::string> word_def_stack){
     std::map<std::string, std::function<void(std::stack<std::string>&)>> word_func = create_word_map();
 
@@ -393,6 +409,7 @@ void parse_word_definition(std::stack<std::string> word_def_stack){
 
 }
 
+//handles all instances of tokens on the command line
 void token_separator(std::stack<std::string> stringStack, std::queue<std::string> stringQueue){
     std::map<std::string, token_type_t> typeMap = create_type_map();
     std::map<std::string, std::function<void(std::stack<int>&)>> funcMap = create_func_map_int();
@@ -404,6 +421,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
         stringStack.pop();
         if (typeMap.find(current) != typeMap.end()){
             token_type_t val = typeMap[current];
+            //if there is a symbol (function) instance, pass into function map to handle
             if (val == token_type_t::SYMBOL){
              
                 if (func_str_map.find(current) != func_str_map.end()){
@@ -416,6 +434,8 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     funcMap[current](intStack);
                    
                 }
+
+            //check for word instances that handle variable calls, array calls, constant calls
             } else if (typeMap[current] == token_type_t::WORD){
                 if (stringQueue.back() == "!"){
 
@@ -543,15 +563,19 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                 }
                 
                 
-            } 
+            }
+        //checks if token is a digit through CheckDigits, pushes it to stack
         } else if (checkDigits(current)){
                 int num = std::stoi(current);
                 intStack.push(num);
                 stringQueue.pop();
                 
-                
+
+          //checks if there is anything left on the stack that hasn't been parsed
         } else if (stringStack.size() == 0){
 
+            //checks if what on the stack is a variable name that has been created
+            //if it is variable name and alone, push memory address
             if (variable_map.find(current) != variable_map.end()){
                 auto it = variable_map.find(current);
                 if (it != variable_map.end()){
@@ -565,19 +589,23 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     
                 }   
             }
-          
+
+        //check if current value is a constant that has been created
         } else if (constant_map.find(current) != constant_map.end()){
             int value = constant_map[current];
             intStack.push(value);
+        //check if the current value is the name of a function (used with other things)
         } else if (word_definition_map.find(current) != word_definition_map.end()){
               stringQueue.pop();
               parse_word_definition(word_definition_map[current]);
+        //check if the current value is a word definition (if, do, print word)
         } else if (word_func.find(current) != word_func.end()){
             word_func[current](stringStack);
         } 
 
     }
 
+    //for instances of just function call 
     std::string current = stringQueue.front();
     if (word_definition_map.find(current) != word_definition_map.end()){
               stringQueue.pop();
@@ -590,6 +618,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
     
 }
 
+//prints stack in forth format
 void printStack(std::stack<int>& int_stack) {
     std::stack<int> temp_stack;
     std::vector<int> items;
@@ -618,7 +647,7 @@ void printStack(std::stack<int>& int_stack) {
     std::cout << "] <- Top" << std::endl;
 }
 
-
+//converts queue to stack for proper handling
 std::stack<std::string> queue_to_stack(std::queue<std::string> test_queue){
     std::stack<std::string> stack1;
     std::stack<std::string> stack2;
