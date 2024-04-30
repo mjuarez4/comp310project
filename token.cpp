@@ -455,62 +455,25 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                    
                 }
             } else if (typeMap[current] == token_type_t::WORD){
-                
-                //this is to add value to variable
-		/*
                 if (stringQueue.back() == "!"){
+
+                  
                     
+                    //std::cout<<stringQueue.front()<<std::endl;
+                    //
                     int value = intStack.top();
+
+
+                    //std::string string1 = stringQueue.front();
+                    //std::cout<<string1<<std::endl;
                     intStack.pop();
                     variable_map[stringQueue.front()] = value;
                     stringQueue.pop();
                     stringQueue.pop();
                     //std::cout << "uhoh" << std::endl;
+                    
                 }
-		*/
-		
-		
-		if (!stringQueue.empty() && stringQueue.back() == "!") {
-    		    // First, handle the value
-    		    int value = intStack.top();
-    		    intStack.pop();
-
-    		    // Now get the variable name
-    		    std::string variableName = stringQueue.front(); // Assuming 'number' is next in line
-    		    //stringQueue.pop(); // Remove the variable name
-    		    stringQueue.pop(); // Remove '!' from the end
-
-    		    // Handle possible array or standard variable assignment
-    		    if (!stringQueue.empty() && stringQueue.front() == "+") {
-        		stringQueue.pop(); // Remove '+'
-        		if (intStack.empty()) {
-            		    int index = intStack.top(); 
-			    intStack.pop();
-			    std::cout << "Index: " << index << std::endl;
-			    int val = intStack.top(); 
-			    intStack.pop();
-			    std::cout << "Value: " << val << std::endl;
-
-
-
-            		    // Perform array assignment
-            		    if (variable_array_map.find(variableName) != variable_array_map.end() &&
-                		index >= 0 && index < variable_array_map[variableName].size()) {
-                		variable_array_map[variableName][index] = val;
-            		    } else {
-                		std::cerr << "Error: Invalid array operation or index out of bounds." << std::endl;
-            		    }
-        		} else {
-            		    std::cerr << "Error: Index not provided for array assignment." << std::endl;
-        		}
-    		    } else {
-        		// Perform standard variable assignment
-        		variable_map[variableName] = value;
-			stringQueue.pop();
-    		    }
-		}
-
-
+                
                 //checks for instance of "variable", if so create variable
                 if (func_str_map.find(current) != func_str_map.end()){
                     //std::cout << "Calling function for: " << current << std::endl;
@@ -518,57 +481,126 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     
                 }
 
-		/*
-		if (current == "cells") {
-                    if (!stringQueue.empty() && stringQueue.back() == "allot") {
-                        stringStack.pop();  // Remove "cells"
-			stringStack.pop(); //remove "allot"
-                        if (!intStack.empty()) {
-                            int cell_count = intStack.top();
-                            intStack.pop();
-                            if (!stringStack.empty()) {
-                                std::string variable_name = stringStack.top();
-                                stringStack.pop();
-                                std::vector<int> new_array(cell_count, 0);
-                                variable_array_map[variable_name] = new_array;
-                            }
-                        } else {
-                            std::cerr << "Error: 'cells' command requires a preceding integer value on the stack." << std::endl;
-                        }
-                    }
-                }
-		*/
 
-		if (current == "cells" && stringStack.top() == "allot" && !intStack.empty()) {
-			int cell_count = intStack.top();
-			intStack.pop();
-			stringStack.pop(); //this is "allot"
-			std::string variable_name = stringStack.top();
-		        if (variable_array_map.find(variable_name) != variable_array_map.end()) {
-			    make_array(cell_count, variable_name);
-			}
-		}
+         
+		
+
+		        if (current == "cells" && stringStack.top() == "allot" && !intStack.empty()) {
+			        int cell_count = intStack.top();
+			        intStack.pop();
+			        stringStack.pop(); //this is "allot"
+			        std::string variable_name = stringStack.top();
+		                if (variable_array_map.find(variable_name) != variable_array_map.end()) {
+			            make_array(cell_count, variable_name);
+			        }
+		        }
 			    	
 			
 
                 
                 //this is to retrieve variable value
                 if (stringQueue.back() == "@") {
+                    std::string variable_name = stringQueue.front();
+                    stringQueue.pop();
+                    
+                    if (variable_map.find(variable_name) != variable_map.end()){
+                         int var_value = variable_map[variable_name];
+                         intStack.push(var_value);
+                    } else if (variable_array_map.find(variable_name) != variable_array_map.end()){
+                        //0 bean @
+                        int index_val = intStack.top();
+                        intStack.pop();
+                        //get 0
+
+                        std::vector<int> get_array = variable_array_map[variable_name];
+                        int value_at_index = get_array[index_val];
+
+                        intStack.push(value_at_index);
+
+                        stringQueue.pop();
+                        //pop @
+                       
+                        //pop +!
+                    }
+                    /*
                     std::string var1 = stringQueue.front();
                     stringQueue.pop();
                     int var_value = variable_map[var1];
                     intStack.push(var_value);
+                    */
                 //prints out variable value
                 } else if (stringQueue.back() == "?"){
-                    std::string var1 = stringQueue.front();
+                    std::string variable_name = stringQueue.front();
                     stringQueue.pop();
-                    int var_value = variable_map[var1];
-                    std::cout<<var_value<<std::endl;
+                    
+                    if (variable_map.find(variable_name) != variable_map.end()){
+                         int var_value = variable_map[variable_name];
+                         //intStack.push(var_value);
+                         std::cout<<var_value<<std::endl;
+                    } else if (variable_array_map.find(variable_name) != variable_array_map.end()){
+                        //0 bean @
+                        int index_val = intStack.top();
+                        intStack.pop();
+                        //get 0
+
+                        std::vector<int> get_array = variable_array_map[variable_name];
+                        int value_at_index = get_array[index_val];
+
+                        //intStack.push(value_at_index);
+                        std::cout<<value_at_index<<std::endl;
+
+                        stringQueue.pop();
+                        //pop @
+                       
+                        //pop +!
+                    }
+                    
 
                     
                 //updates variable value
                 } else if (stringQueue.back() == "+!"){
+                    std::string variable_name = stringQueue.front();
+                    stringQueue.pop();
 
+
+                    if (variable_map.find(variable_name) != variable_map.end()){
+                            //intStack.pop();
+                        int increase = intStack.top();
+                        intStack.pop();
+
+                        //std::cout<<stringQueue.front()<<std::endl;
+                        //stringQueue.pop();
+                        //variable name
+                        int current_val = variable_map[variable_name];
+                        variable_map[variable_name] = current_val + increase;
+                        //stringQueue.pop();
+                        stringQueue.pop();
+                    } else if (variable_array_map.find(variable_name) != variable_array_map.end()){
+                        //bean + !
+                        // 10 0
+                        
+
+                        int index_val = intStack.top();
+                        intStack.pop();
+                        
+
+                        int val_replace = intStack.top();
+                        intStack.pop();
+                        
+
+                        std::vector<int> get_array = variable_array_map[variable_name];
+                        get_array[index_val] = val_replace;
+                       
+
+                        variable_array_map[variable_name] = get_array;
+                        
+
+                        std::string string1 = stringQueue.front();
+                        stringQueue.pop();
+                       
+                        //pop +!
+                    }
+                    /*
                     //intStack.pop();
                     int increase = intStack.top();
                     intStack.pop();
@@ -580,6 +612,7 @@ void token_separator(std::stack<std::string> stringStack, std::queue<std::string
                     variable_map[stringQueue.front()] = current_val + increase;
                     stringQueue.pop();
                     stringQueue.pop();
+                    */
                 }
                 
                 
@@ -693,6 +726,7 @@ std::stack<std::string> queue_to_stack(std::queue<std::string> test_queue){
 
 
 }
+
 
 
 
